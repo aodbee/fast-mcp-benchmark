@@ -45,17 +45,22 @@ ON transaction_statement(project_id, fiscal_year);
 
 ## 🚀 Quickstart: Running Benchmarks
 
-### 1. Run the Real-Scale 800,000 Rows Multi-Table Join Benchmark
+### 1. Run the Unified Comparison Evaluating All 8 Architectures
+```bash
+python3 benchmark/run_all_comparisons.py
+```
+
+### 2. Run the Real-Scale 800,000 Rows Multi-Table Join Benchmark
 ```bash
 python3 benchmark/test_real_800k.py
 ```
 
-### 2. Run the Standard 100,000 Rows Workload Suite (with VES Scoring)
+### 3. Run the Standard 100,000 Rows Workload Suite (with VES Scoring)
 ```bash
 python3 benchmark/benchmark_suite.py
 ```
 
-### 3. Custom Scale Generation
+### 4. Custom Scale Generation
 To generate a custom database size (*e.g.*, 500,000 rows):
 ```bash
 python3 benchmark/setup_db.py 500000

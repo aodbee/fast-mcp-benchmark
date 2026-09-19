@@ -160,10 +160,13 @@ Clone this repository and execute the automated benchmark runner:
 git clone https://github.com/aodbee/fast-mcp-benchmark.git
 cd fast-mcp-benchmark
 
-# 1. Run the 800,000 Rows Real-Scale Multi-Table Join Benchmark
+# 1. Run the unified comparison evaluating all 8 architectures
+python3 benchmark/run_all_comparisons.py
+
+# 2. Run the 800,000 Rows Real-Scale Multi-Table Join Benchmark
 python3 benchmark/test_real_800k.py
 
-# 2. Run the 100,000 Rows Standard Workload Suite (with VES scoring)
+# 3. Run the standard workload suite (with VES & EX scoring)
 python3 benchmark/benchmark_suite.py
 ```
 
@@ -185,11 +188,24 @@ fast-mcp-benchmark/
 ├── README.md                          # Repository overview & evaluation guide
 ├── LICENSE                            # MIT License
 └── benchmark/
+    ├── run_all_comparisons.py         # Unified runner across all 8 systems
     ├── test_real_800k.py              # Real-scale 800,000 rows multi-table join benchmark
+    ├── benchmark_suite.py             # Main evaluation suite runner (EX, VSR, VES)
     ├── setup_db.py                    # Database generator (English enterprise schema)
-    ├── benchmark_suite.py             # Main evaluation suite runner
+    ├── baselines/                     # 7 SOTA baseline implementations
+    │   ├── naive_sql.py               # Naive Zero-Shot Text-to-SQL
+    │   ├── langchain_react.py         # LangChain ReAct Multi-Turn Agent
+    │   ├── vanna_rag.py               # Vanna.ai DDL Vector RAG
+    │   ├── din_sql.py                 # DIN-SQL Decomposed Pipeline (NeurIPS '23)
+    │   ├── mac_sql.py                 # MAC-SQL Multi-Agent Collaboration (TKDE '24)
+    │   ├── dail_sql.py                # DAIL-SQL Skeleton Few-Shot (VLDB '24)
+    │   └── db_gpt_hub.py              # DB-GPT-Hub SFT Open-Source LLM
+    ├── fast_mcp/                      # Fast-MCP research implementation
+    │   ├── semantic_tools.py          # Parameterized O(log N) compound indexed primitives
+    │   ├── mcp_protocol.py            # Model Context Protocol JSON-RPC 2.0 interface
+    │   └── fast_agent.py              # Single-turn sub-second agent synthesizer
     ├── README.md                      # Benchmark manual & dataset specs
-    └── results/
+    └── results/                       # Telemetry outputs & raw benchmarks
         ├── benchmark_results.json     # Detailed telemetry output
         ├── benchmark_summary.csv      # Tabular summary metrics
         └── scalability_results.csv    # Latency across row scales
