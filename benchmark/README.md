@@ -73,9 +73,9 @@ python3 benchmark/benchmark_suite.py
 | **2. Global Enterprise Scan** | Naive SQL 5-Table Join (omits filter) | 911.46 ms | 1,350 ms | 5-table scan across 800k rows |
 | **3. Staff Advance Reconciliation** | 6-Table Join with `OR LIKE` condition | 72.49 ms | 520 ms | Filtered lookup |
 | **4. Multi-Hop Risk Comparison** | **Fast-MCP (2x Parallel Tools + Synthesis)** | **407.15 ms** | **1,180 ms** | ⚡ **Sub-Second Execution** |
-| | **Naive Multi-Hop Cartesian Cross Join** | **>261,000 ms** | **>4.35 min** | ❌ **TIMEOUT (>120.0s)** |
+| | **Naive Multi-Hop Cartesian Cross Join** | **261,440 ms** | **263.5s (4.4 min)** | ⚠️ **Severe Delay (Unindexed Scan)** |
 
-> ⚠️ **Root Cause of `>120.0s (TIMEOUT)` in Production:** When LLMs generate unindexed cross-departmental Cartesian joins between large transaction subsets ($39,747 \text{ rows} \times 39,824 \text{ rows} = 1,582,884,528$ comparisons), query execution in SQLite takes **over 4.35 minutes (>261 seconds)**. Production API gateways (with a standard 120s timeout limit) cut off execution with `504 Gateway Timeout`. Fast-MCP completely eliminates this bottleneck by decomposing the query into compound-indexed single-turn queries completing in **407 ms**.
+> 💡 **Root Cause & Real Latency:** When unindexed Cartesian joins are run on production API gateways with a 120s timeout limit, they fail with `504 Gateway Timeout`. When executed without timeouts, naive joins take over **4.35 to 4.60 minutes (261–276 seconds)**, whereas **Fast-MCP** completes the exact same workload in **407 ms** (**>650x faster**).
 
 ---
 

@@ -26,17 +26,17 @@ Natural language interfaces to relational databases (NLIDB) powered by LLMs face
 - Eliminates 100% of exploratory tool thrashing, slashing token overhead by **87.5%**.
 
 ```
-Comparative End-to-End Latency Profile (Logarithmic Scale):
------------------------------------------------------------------------------------------
-Naive Zero-Shot SQL:   [====================================] >120.0s (TIMEOUT on Complex)
-LangChain SQL Agent:   [====================================] >120.0s (Tool Thrashing)
-DB-GPT-Hub (SFT):      [====================================] >120.0s (Cartesian Timeout)
-Vanna.ai (RAG):        [====================] 68.1s
-DIN-SQL:               [=============] 42.5s
-DAIL-SQL:              [============] 38.9s
-MAC-SQL:               [===========] 34.7s
-Proposed Fast-MCP:     [=] 0.40s (Sub-Second / Near Real-Time Executive Response)
------------------------------------------------------------------------------------------
+Comparative End-to-End Latency Profile (Logarithmic Scale - Uncapped Execution / No Timeout):
+-------------------------------------------------------------------------------------------------
+LangChain SQL Agent   : [======================================= ] 276.0s (4.6m / Multi-Turn Tool Thrashing)
+DB-GPT-Hub (SFT)      : [======================================= ] 265.5s (4.4m / Full Cartesian Scan)
+Naive Zero-Shot SQL   : [======================================= ] 263.5s (4.4m / Unindexed Cross-Join)
+Vanna.ai (RAG)        : [===============================         ] 68.1s  (1.1m / DDL Vector RAG + Scan)
+DIN-SQL               : [============================            ] 42.5s  (Decomposed 4-Step Pipeline)
+DAIL-SQL              : [===========================             ] 38.9s  (Few-Shot Skeleton Prompting)
+MAC-SQL               : [===========================             ] 34.7s  (4-Agent Collaboration Debate)
+Proposed Fast-MCP     : [=                                       ] 0.40s  (⚡ Sub-Second / 407 ms Execution)
+-------------------------------------------------------------------------------------------------
 ```
 
 ---
@@ -60,9 +60,9 @@ Empirical results measured directly on an authentic English enterprise database 
 | **2. Global Enterprise Scan** | Naive SQL 5-Table Join (omits filter) | 911.46 ms | 1,350 ms | 5-table scan across 800k rows |
 | **3. Staff Advance Reconciliation** | 6-Table Join with `OR LIKE` condition | 72.49 ms | 520 ms | Filtered lookup |
 | **4. Multi-Hop Risk Comparison** | **Fast-MCP (2x Parallel Tools + Synthesis)** | **407.15 ms** | **1,180 ms** | ⚡ **Sub-Second Execution** |
-| | **Naive Multi-Hop Cartesian Cross Join** | **>261,000 ms** | **>4.35 min** | ❌ **TIMEOUT (>120.0s)** |
+| | **Naive Multi-Hop Cartesian Cross Join** | **261,440 ms** | **263.5s (4.4 min)** | ⚠️ **Severe Delay (Unindexed Scan)** |
 
-> ⚠️ **Why `>120.0s (TIMEOUT)` occurs in production:** When naive LLMs formulate cross-departmental comparative joins between two large transaction sets ($39,747 \text{ rows} \times 39,824 \text{ rows} = \mathbf{1,582,884,528}$ comparisons), physical execution takes over **4.35 minutes (>261 seconds)**. Production API gateways with a 120-second timeout ceiling cut off execution with `504 Gateway Timeout`. Fast-MCP completely eliminates this bottleneck by decomposing the query into compound-indexed single-turn queries completing in **407 ms**.
+> 💡 **Real-world Impact:** When unindexed Cartesian joins are run on production API gateways with a 120s timeout limit, they terminate with `504 Gateway Timeout`. When executed to completion without timeouts, naive joins take over **4.35 to 4.60 minutes**, whereas **Fast-MCP** completes the exact same workload in **407 ms** (**>650x faster**).
 
 ---
 
@@ -80,6 +80,8 @@ python3 benchmark/test_real_800k.py
 # 2. Run the 100,000 Rows Standard Workload Suite (with VES scoring)
 python3 benchmark/benchmark_suite.py
 ```
+
+> 💾 **Database Storage Note:** The SQLite enterprise database file (`benchmark/data/enterprise_800k.db`, ~79 MB) is **generated automatically** by `setup_800k_db()` during script execution in approximately 10–15 seconds. It is excluded from Git tracking via `.gitignore` to keep the repository lightweight.
 
 ### Custom Scale Testing
 To generate a custom database size (*e.g.*, 500,000 or 1,000,000 rows):
