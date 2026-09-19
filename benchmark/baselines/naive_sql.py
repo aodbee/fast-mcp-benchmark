@@ -14,6 +14,12 @@ Characteristics:
 import time
 import sqlite3
 from typing import Dict, Any, Tuple
+import os
+import sys
+
+# Ensure benchmark directory is on sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from llm_client import get_llm_client, clean_sql
 
 SCHEMA_DDL = """
 CREATE TABLE departments (
@@ -89,6 +95,7 @@ CREATE TABLE advance_settle_forms (
 class NaiveZeroShotSQL:
     def __init__(self, db_path: str):
         self.db_path = db_path
+        self.client = get_llm_client()
 
     def generate_prompt(self, natural_language_question: str) -> str:
         return f"""You are a database expert. Given the SQLite schema below, write an executable SQL query to answer the user's question.
@@ -98,48 +105,18 @@ Schema:
 Question: {natural_language_question}
 Respond with only the SQL query:"""
 
-    def map_question_to_sql(self, question: str) -> str:
-        """Standard zero-shot SQL candidates for evaluated workload tiers"""
-        q = question.lower()
-        if "delayed" in q or "lagging" in q:
-            # Naive SQL omits CAST, causing SQLite dynamic type affinity trap
-            return """
-            SELECT p.project_code, p.project_name, 
-                   SUM(s.net_budget) as net,
-                   SUM(s.used_budget) as used,
-                   SUM(s.remain_budget) as remain
-            FROM projects p
-            JOIN activities a ON p.project_id = a.project_id
-            JOIN expense_items i ON a.activity_id = i.activity_id
-            JOIN transaction_statement s ON i.item_id = s.item_id
-            WHERE s.dept_code = '10010000' AND s.fiscal_year = 2026 AND s.month = 12
-            GROUP BY p.project_code, p.project_name
-            HAVING remain > 50000
-            ORDER BY remain DESC LIMIT 10;
-            """
-        elif "advance" in q or "settle" in q or "borrow" in q:
-            return """
-            SELECT u.full_name, u.dept_code, f.doc_no, f.amount
-            FROM staff_users u
-            JOIN approval_forms f ON u.staff_id = f.staff_id
-            WHERE u.dept_code = '10010000'
-            ORDER BY f.amount DESC LIMIT 10;
-            """
-        elif "compare" in q or "allocation" in q:
-            return """
-            SELECT dept_code, 
-                   SUM(CAST(net_budget AS REAL)) as total_net,
-                   SUM(CAST(used_budget AS REAL)) as total_used,
-                   SUM(CAST(remain_budget AS REAL)) as total_remain
-            FROM transaction_statement
-            WHERE dept_code IN ('10010000', '10020000') AND fiscal_year = 2026 AND month = 12
-            GROUP BY dept_code;
-            """
-        else:
-            return "SELECT dept_code, dept_name, allocated_budget FROM departments WHERE dept_code = '10010000';"
+    def map_question_to_sql(self, question: str) -> Tuple[str, int, float]:
+        """Generates SQL using live LLM service (or deterministic fallback in mock mode)."""
+        prompt = self.generate_prompt(question)
+        system_prompt = "You are a senior database engineer. Return ONLY executable SQLite SQL without markdown fences or explanations."
+        
+        res = self.client.generate(prompt, system_prompt)
+        sql = clean_sql(res.text)
+        return sql, res.total_tokens, res.latency_ms
 
     def execute(self, question: str) -> Dict[str, Any]:
-        sql = self.map_question_to_sql(question)
+        sql, token_overhead, llm_latency_ms = self.map_question_to_sql(question)
+        
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
@@ -158,11 +135,7 @@ Respond with only the SQL query:"""
             db_time_ms = (time.perf_counter() - t0) * 1000.0
             conn.close()
 
-        # Simulated prompt token count (DDL + user prompt)
-        token_overhead = 4250
-        turn_count = 1.0
-        # Wall-clock latency = DB time + LLM single-turn generation (~450ms)
-        total_latency_ms = db_time_ms + 450.0
+        total_latency_ms = db_time_ms + llm_latency_ms
 
         return {
             "baseline": "Naive Zero-Shot SQL",
@@ -173,12 +146,15 @@ Respond with only the SQL query:"""
             "row_count": len(rows),
             "db_latency_ms": round(db_time_ms, 2),
             "total_latency_ms": round(total_latency_ms, 2),
+            "llm_latency_ms": round(llm_latency_ms, 2),
             "token_overhead": token_overhead,
-            "turns": turn_count
+            "turns": 1.0,
+            "is_live": self.client.is_live
         }
 
 if __name__ == "__main__":
     db = "benchmark/data/enterprise_800k.db"
     runner = NaiveZeroShotSQL(db)
     res = runner.execute("List the top delayed projects for Department 10010000 in fiscal year 2026 month 12")
-    print(f"[{res['baseline']}] DB: {res['db_latency_ms']} ms | Total: {res['total_latency_ms']} ms | Valid: {res['valid_sql']}")
+    print(f"[{res['baseline']}] DB: {res['db_latency_ms']} ms | LLM: {res['llm_latency_ms']} ms | Total: {res['total_latency_ms']} ms | Valid: {res['valid_sql']}")
+    print(f"SQL Generated:\n{res['generated_sql'][:160]}...")

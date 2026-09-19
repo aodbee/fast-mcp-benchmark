@@ -5,68 +5,92 @@ Framework: Fine-tuned CodeLlama-13B / DeepSeek-Coder using QLoRA for Text-to-SQL
 Characteristics:
   - Open-weights model trained specifically on Spider/BIRD schema-to-SQL pairs.
   - Zero-shot inference without external search or multi-agent debate.
-  - Moderate accuracy (39.4% EX) due to unindexed join formulations on enterprise schemas.
-  - Single turn generation (3,880 tokens).
+  - Single turn generation with instruction-response formatting.
 """
 
+import os
+import sys
 import time
 import sqlite3
 from typing import Dict, Any
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from llm_client import get_llm_client, clean_sql
+
 class DBGPTHub:
     def __init__(self, db_path: str):
         self.db_path = db_path
+        self.client = get_llm_client()
 
     def format_sft_prompt(self, question: str) -> str:
         return f"""### Instruction:
-Given the enterprise relational schema, write SQL for: {question}
+Given the enterprise relational schema (projects, activities, expense_items, transaction_statement), write an executable SQLite query for: {question}
 
 ### Response:
 """
 
     def run(self, question: str) -> Dict[str, Any]:
-        t0 = time.perf_counter()
-        
-        # SFT model inference simulation (13B model local forward pass: ~650ms)
-        time.sleep(0.065)
+        prompt = self.format_sft_prompt(question)
 
-        sql = """
-        SELECT p.project_code, p.project_name, 
-               SUM(CAST(s.net_budget AS REAL)) as net,
-               SUM(CAST(s.used_budget AS REAL)) as used,
-               SUM(CAST(s.remain_budget AS REAL)) as remain
-        FROM projects p
-        JOIN activities a ON p.project_id = a.project_id
-        JOIN expense_items i ON a.activity_id = i.activity_id
-        JOIN transaction_statement s ON i.item_id = s.item_id
-        WHERE s.dept_code = '10010000' AND s.fiscal_year = 2026 AND s.month = 12
-        GROUP BY p.project_code, p.project_name
-        ORDER BY remain DESC LIMIT 10;
-        """
+        if self.client.is_live:
+            system_prompt = "You are an instruction-tuned Text-to-SQL foundation model (DB-GPT-Hub). Output ONLY raw executable SQLite query."
+            res = self.client.generate(prompt, system_prompt)
+            sql = clean_sql(res.text)
+            llm_latency_ms = res.latency_ms
+            token_overhead = res.total_tokens
+        else:
+            time.sleep(0.065)
+            sql = """
+            SELECT p.project_code, p.project_name, 
+                   SUM(CAST(s.net_budget AS REAL)) as net,
+                   SUM(CAST(s.used_budget AS REAL)) as used,
+                   SUM(CAST(s.remain_budget AS REAL)) as remain
+            FROM projects p
+            JOIN activities a ON p.project_id = a.project_id
+            JOIN expense_items i ON a.activity_id = i.activity_id
+            JOIN transaction_statement s ON i.item_id = s.item_id
+            WHERE s.dept_code = '10010000' AND s.fiscal_year = 2026 AND s.month = 12
+            GROUP BY p.project_code, p.project_name
+            ORDER BY remain DESC LIMIT 10;
+            """
+            llm_latency_ms = 650.0
+            token_overhead = 3880
 
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         t_db_start = time.perf_counter()
-        cur.execute(sql)
-        rows = cur.fetchall()
-        db_ms = (time.perf_counter() - t_db_start) * 1000.0
-        conn.close()
+        valid_sql = True
+        error_msg = None
+        rows = []
+        try:
+            cur.execute(sql)
+            rows = cur.fetchall()
+        except Exception as e:
+            valid_sql = False
+            error_msg = str(e)
+        finally:
+            db_ms = (time.perf_counter() - t_db_start) * 1000.0
+            conn.close()
 
-        total_latency_ms = db_ms + 650.0
+        total_latency_ms = db_ms + llm_latency_ms
 
         return {
             "baseline": "DB-GPT-Hub (CodeLlama-13B SFT)",
             "question": question,
+            "generated_sql": sql.strip(),
             "db_latency_ms": round(db_ms, 2),
+            "llm_latency_ms": round(llm_latency_ms, 2),
             "total_latency_ms": round(total_latency_ms, 2),
-            "token_overhead": 3880,
+            "token_overhead": token_overhead,
             "turns": 1.0,
-            "valid_sql": True,
-            "row_count": len(rows)
+            "valid_sql": valid_sql,
+            "error": error_msg,
+            "row_count": len(rows),
+            "is_live": self.client.is_live
         }
 
 if __name__ == "__main__":
     db = "benchmark/data/enterprise_800k.db"
     hub = DBGPTHub(db)
     res = hub.run("List the top delayed projects for Department 10010000")
-    print(f"[{res['baseline']}] DB: {res['db_latency_ms']} ms | Total: {res['total_latency_ms']} ms")
+    print(f"[{res['baseline']}] DB: {res['db_latency_ms']} ms | Total: {res['total_latency_ms']} ms | Valid: {res['valid_sql']}")

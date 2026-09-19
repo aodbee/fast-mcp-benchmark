@@ -15,6 +15,9 @@ Runs all 8 systems on the real enterprise relational database:
 import os
 import sys
 import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from llm_client import get_llm_client
 from baselines.naive_sql import NaiveZeroShotSQL
 from baselines.langchain_react import LangChainSQLAgent
 from baselines.vanna_rag import VannaRAG
@@ -31,10 +34,16 @@ if not os.path.exists(DB_PATH):
     setup_800k_db()
 
 def run_all_baselines(question: str):
-    print("=" * 105)
-    print(f"  EVALUATING SOTA PARADIGMS ON ENTERPRISE DATABASE (800,000 ROWS)")
+    client = get_llm_client()
+    
+    print("=" * 115)
+    print(f"  FAST-MCP vs SOTA BASELINE EVALUATION (800,000-ROW ENTERPRISE DATABASE)")
     print(f"  Test Question: \"{question}\"")
-    print("=" * 105)
+    if client.is_live:
+        print(f"  Execution Mode: 🟢 LIVE SERVICE ({client.provider.upper()} | Model: {client.model})")
+    else:
+        print(f"  Execution Mode: 🟡 DETERMINISTIC OFFLINE BENCHMARK (Copy .env.example to .env for live mode)")
+    print("=" * 115)
 
     systems = [
         ("Naive Zero-Shot SQL", NaiveZeroShotSQL(DB_PATH).execute),
@@ -50,22 +59,28 @@ def run_all_baselines(question: str):
     results = []
     for name, runner in systems:
         print(f"-> Executing: {name:<25} ... ", end="", flush=True)
-        res = runner(question)
-        print(f"Done in {res['total_latency_ms']:8.2f} ms | DB Latency: {res['db_latency_ms']:8.2f} ms")
-        results.append(res)
+        try:
+            res = runner(question)
+            db_lat = res.get('db_latency_ms', 0.0)
+            tot_lat = res.get('total_latency_ms', 0.0)
+            print(f"Done in {tot_lat:8.2f} ms | DB Latency: {db_lat:8.2f} ms")
+            results.append(res)
+        except Exception as e:
+            print(f"FAILED: {e}")
 
-    print("\n" + "=" * 105)
-    print(f"{'System / Framework':<26} | {'DB Latency':<12} | {'Total Latency':<14} | {'Tokens':<10} | {'Turns':<6} | {'Status'}")
-    print("-" * 105)
+    print("\n" + "=" * 115)
+    print(f"{'System / Framework':<26} | {'DB Latency':<12} | {'LLM Latency':<13} | {'Total Latency':<14} | {'Tokens':<9} | {'Turns':<6} | {'Valid'}")
+    print("-" * 115)
     for r in results:
         sys_name = r.get("baseline") or r.get("system")
-        db_lat = f"{r['db_latency_ms']} ms"
-        tot_lat = f"{r['total_latency_ms']} ms"
-        tok = str(r['token_overhead'])
+        db_lat = f"{r.get('db_latency_ms', 0.0):.2f} ms"
+        llm_lat = f"{r.get('llm_latency_ms', 0.0):.2f} ms"
+        tot_lat = f"{r.get('total_latency_ms', 0.0):.2f} ms"
+        tok = str(r.get('token_overhead', 0))
         turns = str(r.get('turns') or r.get('turns_taken') or r.get('agent_turns') or r.get('llm_calls', 1.0))
-        status = "⚡ Sub-Second" if "Fast-MCP" in sys_name else "Completed"
-        print(f"{sys_name:<26} | {db_lat:<12} | {tot_lat:<14} | {tok:<10} | {turns:<6} | {status}")
-    print("=" * 105 + "\n")
+        valid = "✅ YES" if r.get('valid_sql', True) else "❌ NO"
+        print(f"{sys_name:<26} | {db_lat:<12} | {llm_lat:<13} | {tot_lat:<14} | {tok:<9} | {turns:<6} | {valid}")
+    print("=" * 115 + "\n")
 
 if __name__ == "__main__":
     test_q = "List the top delayed projects for Department 10010000 in fiscal year 2026 month 12 with remaining unspent budget exceeding 50,000 THB"

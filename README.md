@@ -152,6 +152,41 @@ To evaluate qualitative response fidelity alongside execution metrics, the bench
 
 ---
 
+## ⚙️ Configuration & Live LLM Setup (.env)
+
+The evaluation harness connects all 8 evaluation paradigms to real foundation model endpoints via `benchmark/llm_client.py` (pure Python, zero heavy SDK dependencies).
+
+### Step 1: Copy Environment Template
+```bash
+cp .env.example .env
+```
+
+### Step 2: Configure Provider & API Keys in `.env`
+
+* **Option 1: Google Gemini (Recommended):**
+  ```env
+  LLM_PROVIDER=gemini
+  GEMINI_API_KEY=your_gemini_api_key_here
+  GEMINI_MODEL=gemini-3.8-flash
+  ```
+* **Option 2: OpenAI API or University AI Gateway (UP / KKU AI Gateway):**
+  ```env
+  LLM_PROVIDER=openai
+  OPENAI_API_KEY=your_gateway_key_here
+  OPENAI_BASE_URL=https://gen.ai.kku.ac.th/upacth/api/v1  # or https://api.openai.com/v1
+  OPENAI_MODEL=gpt-4o-mini
+  ```
+* **Option 3: Anthropic Claude:**
+  ```env
+  LLM_PROVIDER=anthropic
+  ANTHROPIC_API_KEY=your_anthropic_api_key_here
+  ANTHROPIC_MODEL=claude-3-5-haiku-20241022
+  ```
+* **Option 4: Offline Deterministic Mock Mode:**
+  If no API key is specified or `LLM_PROVIDER=mock`, the benchmark runs locally using deterministic execution traces.
+
+---
+
 ## 🚀 Quickstart: Reproducing Results
 
 Clone this repository and execute the automated benchmark runner:
@@ -160,7 +195,7 @@ Clone this repository and execute the automated benchmark runner:
 git clone https://github.com/aodbee/fast-mcp-benchmark.git
 cd fast-mcp-benchmark
 
-# 1. Run the unified comparison evaluating all 8 architectures
+# 1. Run the unified comparison evaluating all 8 architectures (Live or Mock)
 python3 benchmark/run_all_comparisons.py
 
 # 2. Run the 800,000 Rows Real-Scale Multi-Table Join Benchmark
