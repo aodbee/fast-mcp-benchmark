@@ -82,6 +82,76 @@ Empirical results measured directly on an authentic English enterprise database 
 
 ---
 
+## 💬 Benchmark Test Prompts & Qualitative Model Responses
+
+To evaluate qualitative response fidelity alongside execution metrics, the benchmark suite tests authentic natural language financial queries across enterprise complexity tiers:
+
+### Case 1: Delayed Projects Audit (4 Relational Tables Joined)
+* **Natural Language Test Prompt (English):**
+  > *"List the top delayed or lagging projects for Department 10010000 in fiscal year 2026 month 12 with remaining unspent budget exceeding 50,000 THB."*
+* **Fast-MCP Execution Trace (199.5 ms):**
+  * **Semantic Tool Invoked:** `get_delayed_projects(dept_code="10010000", fiscal_year=2026, month=12, min_remain=50000.0)`
+  * **Synthesized Model Response:**
+    ```markdown
+    Found 10 delayed projects for Department 10010000 (Faculty / Division 1) as of FY2026 Month 12:
+
+    | Project Code | Project Name | Net Budget | Disbursed Amount | Remaining Budget | Risk Level |
+    | :--- | :--- | :---: | :---: | :---: | :---: |
+    | **PRJ-1001-0001** | Strategic Initiative 1 | ฿484,567,825.48 | ฿271,395,218.77 | ฿213,172,606.71 | ⚠️ High Risk |
+    | **PRJ-1001-0002** | Strategic Initiative 2 | ฿484,567,825.48 | ฿271,395,218.77 | ฿213,172,606.71 | ⚠️ High Risk |
+    | **PRJ-1001-0003** | Strategic Initiative 3 | ฿484,567,825.48 | ฿271,395,218.77 | ฿213,172,606.71 | ⚠️ High Risk |
+
+    **Summary:** Total unspent risk remainder across top delayed projects is ฿639.52M (Burn rate: 56.01%).
+    ```
+* **Naive Zero-Shot SQL Baseline (510.0 ms / Dynamic Type Defect):**
+  * **Generated SQL:** `SELECT ... FROM projects p JOIN activities a ... WHERE s.remain_budget > 50000 ...`
+  * **Failure Analysis:** Evaluates `remain_budget` as string without `CAST`, returning corrupted lexical ordering.
+
+---
+
+### Case 2: Staff Advance Reconciliation (6 Relational Tables Joined)
+* **Natural Language Test Prompt (English):**
+  > *"Reconcile pending cash advance forms and outstanding borrowing amounts for staff members under Department 10010000."*
+* **Fast-MCP Execution Trace (72.5 ms):**
+  * **Semantic Tool Invoked:** `reconcile_staff_advances(dept_code="10010000")`
+  * **Synthesized Model Response:**
+    ```markdown
+    ### Staff Cash Advance Audit: Department 10010000
+    - **Total Active Advance Forms:** 987 records matched
+    - **Top Outstanding Borrowing Forms:**
+      1. Staff FullName 23 (`DOC-2569-019374`): ฿79,847.72
+      2. Staff FullName 761 (`DOC-2569-002555`): ฿79,624.13
+      3. Staff FullName 203 (`DOC-2569-009774`): ฿79,523.00
+    All records verified against approved departmental expense quotas.
+    ```
+* **Naive Zero-Shot SQL Baseline (520.0 ms):**
+  * Requires traversing 6 distinct tables (`staff_users` ⋈ `approval_forms` ⋈ `projects` ⋈ `activities` ⋈ `expense_items` ⋈ `transaction_statement`).
+
+---
+
+### Case 3: Cross-Department Comparative Analysis (8 Relational Tables Joined)
+* **Natural Language Test Prompt (English):**
+  > *"Compare budget allocation, utilization rate, and remaining funds between Department 10010000 and Department 10020000 for fiscal year 2026."*
+* **Fast-MCP Execution Trace (407.2 ms):**
+  * **Semantic Tool Invoked:** `get_department_summary(dept_codes=["10010000", "10020000"], fiscal_year=2026, month=12)`
+  * **Synthesized Model Response:**
+    ```markdown
+    ### Comparative Budget Utilization (FY2026 Month 12)
+
+    | Metric | Department 10010000 (Division 1) | Department 10020000 (Division 2) | Variance |
+    | :--- | :---: | :---: | :---: |
+    | **Net Budget** | ฿484,567,825.48 | ฿487,219,886.15 | -฿2,652,060.67 |
+    | **Disbursed Amount** | ฿271,395,218.77 | ฿269,265,140.78 | +฿2,130,077.99 |
+    | **Remaining Balance** | ฿213,172,606.71 | ฿217,954,745.37 | -฿4,782,138.66 |
+    | **Disbursement Rate** | **56.01%** | **55.27%** | **+0.74%** |
+
+    **Key Finding:** Department 10010000 demonstrates a slightly faster disbursement rate (+0.74%) with ฿213.17M remaining.
+    ```
+* **Naive SQL Baseline (2,450.0 ms):**
+  * Scans across 800,000 ledger rows twice to calculate group aggregates across divisions without composite partition pruning.
+
+---
+
 ## 🚀 Quickstart: Reproducing Results
 
 Clone this repository and execute the automated benchmark runner:
