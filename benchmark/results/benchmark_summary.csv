@@ -1,0 +1,13 @@
+system,workload_id,db_latency_ms,total_latency_ms,tokens,turns,valid_sql,correct,ves
+Naive Zero-Shot SQL,W1_Atomic,10.09,460.09,4250,1,True,True,0.2226
+LangChain ReAct Agent,W1_Atomic,0.5,2185.18,8900,5.2,True,True,1.0
+Fast-MCP (Proposed),W1_Atomic,0.24,320.24,490,1.0,True,True,1.0
+Naive Zero-Shot SQL,W2_FilteredAgg,156.16,606.16,4250,1,True,True,0.5819
+LangChain ReAct Agent,W2_FilteredAgg,168.64,2353.24,8900,5.2,True,True,0.56
+Fast-MCP (Proposed),W2_FilteredAgg,52.88,372.88,490,1.0,True,True,1.0
+Naive Zero-Shot SQL,W3_Reconciliation,64.85,514.85,4250,1,True,True,0.8415
+LangChain ReAct Agent,W3_Reconciliation,93.7,2278.31,8900,5.2,True,True,0.7001
+Fast-MCP (Proposed),W3_Reconciliation,45.92,365.92,490,1.0,True,True,1.0
+Naive Zero-Shot SQL,W4_MultiHopRisk,137.55,587.55,4250,1,True,True,0.8895
+LangChain ReAct Agent,W4_MultiHopRisk,245.33,2430.38,8900,5.2,True,True,0.666
+Fast-MCP (Proposed),W4_MultiHopRisk,108.82,1258.82,1380,3.0,True,True,1.0

@@ -1,0 +1,157 @@
+{
+  "timestamp": "2026-09-19T21:44:11Z",
+  "results": [
+    {
+      "system": "Naive Zero-Shot SQL",
+      "workload_id": "W1_Atomic",
+      "db_latency_ms": 10.09,
+      "total_latency_ms": 460.09,
+      "tokens": 4250,
+      "turns": 1,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.2226
+    },
+    {
+      "system": "LangChain ReAct Agent",
+      "workload_id": "W1_Atomic",
+      "db_latency_ms": 0.5,
+      "total_latency_ms": 2185.18,
+      "tokens": 8900,
+      "turns": 5.2,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 1.0
+    },
+    {
+      "system": "Fast-MCP (Proposed)",
+      "workload_id": "W1_Atomic",
+      "db_latency_ms": 0.24,
+      "total_latency_ms": 320.24,
+      "tokens": 490,
+      "turns": 1.0,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 1.0
+    },
+    {
+      "system": "Naive Zero-Shot SQL",
+      "workload_id": "W2_FilteredAgg",
+      "db_latency_ms": 156.16,
+      "total_latency_ms": 606.16,
+      "tokens": 4250,
+      "turns": 1,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.5819
+    },
+    {
+      "system": "LangChain ReAct Agent",
+      "workload_id": "W2_FilteredAgg",
+      "db_latency_ms": 168.64,
+      "total_latency_ms": 2353.24,
+      "tokens": 8900,
+      "turns": 5.2,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.56
+    },
+    {
+      "system": "Fast-MCP (Proposed)",
+      "workload_id": "W2_FilteredAgg",
+      "db_latency_ms": 52.88,
+      "total_latency_ms": 372.88,
+      "tokens": 490,
+      "turns": 1.0,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 1.0
+    },
+    {
+      "system": "Naive Zero-Shot SQL",
+      "workload_id": "W3_Reconciliation",
+      "db_latency_ms": 64.85,
+      "total_latency_ms": 514.85,
+      "tokens": 4250,
+      "turns": 1,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.8415
+    },
+    {
+      "system": "LangChain ReAct Agent",
+      "workload_id": "W3_Reconciliation",
+      "db_latency_ms": 93.7,
+      "total_latency_ms": 2278.31,
+      "tokens": 8900,
+      "turns": 5.2,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.7001
+    },
+    {
+      "system": "Fast-MCP (Proposed)",
+      "workload_id": "W3_Reconciliation",
+      "db_latency_ms": 45.92,
+      "total_latency_ms": 365.92,
+      "tokens": 490,
+      "turns": 1.0,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 1.0
+    },
+    {
+      "system": "Naive Zero-Shot SQL",
+      "workload_id": "W4_MultiHopRisk",
+      "db_latency_ms": 137.55,
+      "total_latency_ms": 587.55,
+      "tokens": 4250,
+      "turns": 1,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.8895
+    },
+    {
+      "system": "LangChain ReAct Agent",
+      "workload_id": "W4_MultiHopRisk",
+      "db_latency_ms": 245.33,
+      "total_latency_ms": 2430.38,
+      "tokens": 8900,
+      "turns": 5.2,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 0.666
+    },
+    {
+      "system": "Fast-MCP (Proposed)",
+      "workload_id": "W4_MultiHopRisk",
+      "db_latency_ms": 108.82,
+      "total_latency_ms": 1258.82,
+      "tokens": 1380,
+      "turns": 3.0,
+      "valid_sql": true,
+      "correct": true,
+      "ves": 1.0
+    }
+  ],
+  "scalability": [
+    {
+      "rows": 1000,
+      "naive_join_ms": 8.76,
+      "fast_mcp_ms": 0.48,
+      "speedup_factor": 18.2
+    },
+    {
+      "rows": 10000,
+      "naive_join_ms": 23.73,
+      "fast_mcp_ms": 0.94,
+      "speedup_factor": 25.2
+    },
+    {
+      "rows": 100000,
+      "naive_join_ms": 191.97,
+      "fast_mcp_ms": 88.87,
+      "speedup_factor": 2.2
+    }
+  ]
+}

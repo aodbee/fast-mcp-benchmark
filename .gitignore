@@ -1,0 +1,18 @@
+# SQLite databases and temp files
+*.db
+*.db-wal
+*.db-shm
+benchmark/data/*.db
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
