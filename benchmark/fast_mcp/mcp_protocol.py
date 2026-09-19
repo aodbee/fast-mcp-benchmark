@@ -8,7 +8,10 @@ Implements:
 
 import json
 from typing import Dict, Any, List
-from .semantic_tools import SemanticFastTools
+try:
+    from .semantic_tools import SemanticFastTools
+except ImportError:
+    from semantic_tools import SemanticFastTools
 
 TOOL_DEFINITIONS = [
     {

@@ -57,7 +57,10 @@ class LangChainSQLAgent:
         # Turn 4: sql_db_query_checker (simulated LLM validation turn)
         # Turn 5: Execute final SQL query
         t_db_start = time.perf_counter()
-        from .naive_sql import NaiveZeroShotSQL
+        try:
+            from .naive_sql import NaiveZeroShotSQL
+        except ImportError:
+            from naive_sql import NaiveZeroShotSQL
         naive_runner = NaiveZeroShotSQL(self.db_path)
         sql = naive_runner.map_question_to_sql(question)
         
