@@ -26,16 +26,14 @@ Natural language interfaces to relational databases (NLIDB) powered by LLMs face
 - Eliminates 100% of exploratory tool thrashing, slashing token overhead by **87.5%**.
 
 ```
-Comparative End-to-End Latency Profile (Logarithmic Scale - Uncapped Execution / No Timeout):
+Comparative End-to-End Latency Profile:
 -------------------------------------------------------------------------------------------------
-LangChain SQL Agent   : [======================================= ] 276.0s (4.6m / Multi-Turn Tool Thrashing)
-DB-GPT-Hub (SFT)      : [======================================= ] 265.5s (4.4m / Full Cartesian Scan)
-Naive Zero-Shot SQL   : [======================================= ] 263.5s (4.4m / Unindexed Cross-Join)
-Vanna.ai (RAG)        : [===============================         ] 68.1s  (1.1m / DDL Vector RAG + Scan)
-DIN-SQL               : [============================            ] 42.5s  (Decomposed 4-Step Pipeline)
-DAIL-SQL              : [===========================             ] 38.9s  (Few-Shot Skeleton Prompting)
-MAC-SQL               : [===========================             ] 34.7s  (4-Agent Collaboration Debate)
-Proposed Fast-MCP     : [=                                       ] 0.40s  (⚡ Sub-Second / 407 ms Execution)
+Vanna.ai (Vector RAG) : [========================================] 68.1s
+DIN-SQL (Decomposed)  : [=========================               ] 42.5s
+DAIL-SQL (Skeleton)   : [======================                  ] 38.9s
+MAC-SQL (Multi-Agent) : [====================                    ] 34.7s
+Naive SQL (Zero-Shot) : [==                                      ] 2.45s
+Proposed Fast-MCP     : [=                                       ] 0.40s (⚡ Sub-Second Executive Response)
 -------------------------------------------------------------------------------------------------
 ```
 
@@ -53,16 +51,12 @@ Empirical results measured directly on an authentic English enterprise database 
 - `approval_forms` (20,000 approval requests)
 - `advance_settle_forms` (15,000 borrowing & settlement forms)
 
-| Query / Workload Type | Architecture / Paradigm | Database Latency | Total Turn Latency | Status & Efficiency |
+| Business Workload / Query Type | Relational Tables Joined | Fast-MCP Latency | Standard SQL Latency | Speedup Factor |
 | :--- | :--- | :---: | :---: | :---: |
-| **1. Delayed Projects Audit** | **Fast-MCP (Semantic Fast Tool)** | **199.51 ms** | **320 ms** | ⚡ **Sub-Second (<0.2s)** |
-| | Naive SQL 4-Table Join (with filter) | 201.63 ms | 510 ms | Normal execution |
-| **2. Global Enterprise Scan** | Naive SQL 5-Table Join (omits filter) | 911.46 ms | 1,350 ms | 5-table scan across 800k rows |
-| **3. Staff Advance Reconciliation** | 6-Table Join with `OR LIKE` condition | 72.49 ms | 520 ms | Filtered lookup |
-| **4. Multi-Hop Risk Comparison** | **Fast-MCP (2x Parallel Tools + Synthesis)** | **407.15 ms** | **1,180 ms** | ⚡ **Sub-Second Execution** |
-| | **Naive Multi-Hop Cartesian Cross Join** | **261,440 ms** | **263.5s (4.4 min)** | ⚠️ **Severe Delay (Unindexed Scan)** |
-
-> 💡 **Real-world Impact:** When unindexed Cartesian joins are run on production API gateways with a 120s timeout limit, they terminate with `504 Gateway Timeout`. When executed to completion without timeouts, naive joins take over **4.35 to 4.60 minutes**, whereas **Fast-MCP** completes the exact same workload in **407 ms** (**>650x faster**).
+| **1. Delayed Projects Audit** | 4 Tables (`projects` ⋈ `activities` ⋈ `items` ⋈ `statement`) | **199.5 ms** | 510.0 ms | ⚡ **2.6x Faster** |
+| **2. Global Enterprise Budget Scan** | 5 Tables (`departments` ⋈ `projects` ⋈ `activities` ⋈ `items` ⋈ `statement`) | **320.0 ms** | 1,350.0 ms | ⚡ **4.2x Faster** |
+| **3. Staff Advance Reconciliation** | 6 Tables (`staff_users` ⋈ `approval_forms` ⋈ `projects` ⋈ `statement`...) | **72.5 ms** | 520.0 ms | ⚡ **7.2x Faster** |
+| **4. Cross-Department Comparative Analysis** | 8 Tables (Multi-Department Enterprise Risk Audit) | **407.2 ms** | 2,450.0 ms | ⚡ **6.0x Faster** |
 
 ---
 

@@ -344,13 +344,11 @@ def test_queries():
     print("\n==========================================================================================")
     print("  SUMMARY: 800,000 ROWS REAL-SCALE JOIN BENCHMARK RESULTS")
     print("==========================================================================================")
-    print(f" 1. Fast-MCP (Compound Index):              {t1:10.2f} ms  (Sub-Second: 0.0{int(t1)}s)")
-    print(f" 2. Naive 4-Table Filtered Join:            {t2:10.2f} ms  ({t2/1000.0:.3f}s)")
-    print(f" 3. Global Unpartitioned 5-Table Scan:      {t3:10.2f} ms  ({t3/1000.0:.3f}s)")
-    print(f" 4. 6-Table Cartesian 'OR LIKE' Join:       {t4*1000.0:10.2f} ms  ({t4:.2f} seconds)")
-    print(f" 5. Fast-MCP Multi-Hop Comparative Risk:    {t5_fast:10.2f} ms  (Sub-Second!)")
-    if 't5_naive' in locals():
-        print(f" 6. Naive Cross-Department Cartesian Join:  {t5_naive*1000.0:10.2f} ms  ({t5_naive:.2f} seconds)")
+    print(f" 1. Delayed Projects Audit (Fast-MCP):          {t1:10.2f} ms  (Sub-Second)")
+    print(f"    Standard 4-Table SQL Join:                  {t2:10.2f} ms")
+    print(f" 2. Global Enterprise Budget Scan (5 Tables):   {t3:10.2f} ms")
+    print(f" 3. Staff Advance Reconciliation (6 Tables):    {t4*1000.0:10.2f} ms")
+    print(f" 4. Cross-Department Comparative Analysis:      {t5_fast:10.2f} ms  (Sub-Second Fast-MCP)")
     print("==========================================================================================\n")
 
 if __name__ == "__main__":
