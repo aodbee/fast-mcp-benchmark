@@ -174,3 +174,8 @@ User chose to continue the current `agy` run unchanged (default model, not pinne
 
 ### 17:4x Naming decision: keep "Fast-MCP"
 - The user chose to keep the system name Fast-MCP. Added a naming paragraph at the end of section 1.1 (Semantic MCP tools = the approach; Fast-MCP = the prototype, `fast_mcp` in code; the name does not claim to be faster than every baseline) and adjusted the Thai and English abstract sentences that introduce the system.
+
+### 17:5x Commit and push (user request)
+- Exported the manuscript to Markdown (134,656 characters) as `manuscript/thesis_draft.md` in the working tree; that folder is excluded locally through `.git/info/exclude` and was NOT committed, because the repository https://github.com/aodbee/fast-mcp-benchmark is PUBLIC and the README states the manuscript is under peer review. Awaiting the user's decision.
+- Created branch `eval-harness-results` (not main), committed 28 files (all of `benchmark/eval/`, plus the edits to `benchmark/fast_mcp/semantic_tools.py` and `benchmark/llm_client.py`) as 6c0b4f1, pushed to origin. Secret scan before commit: no API keys found; `.env` is git-ignored. The other files already modified in the working tree before this session (README.md, baselines, etc.) were not staged. `perplexity/` not committed.
+- The log entry above (this paragraph) was written after the commit and is not part of it.
