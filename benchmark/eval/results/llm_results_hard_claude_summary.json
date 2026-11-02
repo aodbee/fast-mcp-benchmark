@@ -1,0 +1,121 @@
+{
+ "dail_sql_style": {
+  "n": 38,
+  "EX": 0.9473684210526315,
+  "EX_ci95": [
+   0.8271423311893115,
+   0.9854460975514632
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.90818706741616,
+   1.0
+  ],
+  "VES": 0.4964603469338926,
+  "tokens_mean": 6472.526315789473,
+  "prompt_tokens_mean": 6232.684210526316,
+  "completion_tokens_mean": 239.8421052631579,
+  "calls_mean": 1,
+  "llm_ms_median": 2736.0,
+  "db_ms_median": 5.0571064984978875,
+  "total_ms_median": 2741.459145999339,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "A_paraphrase": "12/12",
+   "B_variant": "8/8",
+   "C_analytic": "10/10",
+   "D_trap": "6/8"
+  }
+ },
+ "fast_mcp": {
+  "n": 38,
+  "EX": 0.5789473684210527,
+  "EX_ci95": [
+   0.4219207061312732,
+   0.7214772518818047
+  ],
+  "VSR": 0.8421052631578947,
+  "VSR_ci95": [
+   0.6958287736272311,
+   0.9255623777627731
+  ],
+  "VES": 0.5284290533000503,
+  "tokens_mean": 4932.526315789473,
+  "prompt_tokens_mean": 4754.736842105263,
+  "completion_tokens_mean": 177.78947368421052,
+  "calls_mean": 1,
+  "llm_ms_median": 2824.0,
+  "db_ms_median": 4.365949002021807,
+  "total_ms_median": 2827.4540930009825,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "A_paraphrase": "12/12",
+   "B_variant": "2/8",
+   "C_analytic": "0/10",
+   "D_trap": "8/8"
+  },
+  "tool_selection_acc": 0.5263157894736842,
+  "argument_acc": 0.5263157894736842,
+  "out_of_scope_abstain": "0/0"
+ },
+ "naive_sql": {
+  "n": 38,
+  "EX": 1.0,
+  "EX_ci95": [
+   0.90818706741616,
+   1.0
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.90818706741616,
+   1.0
+  ],
+  "VES": 0.5186138822126829,
+  "tokens_mean": 5707.421052631579,
+  "prompt_tokens_mean": 5333.9473684210525,
+  "completion_tokens_mean": 373.4736842105263,
+  "calls_mean": 1,
+  "llm_ms_median": 4068.0,
+  "db_ms_median": 6.745077998857596,
+  "total_ms_median": 4068.905092998437,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "A_paraphrase": "12/12",
+   "B_variant": "8/8",
+   "C_analytic": "10/10",
+   "D_trap": "8/8"
+  }
+ },
+ "vanna_style": {
+  "n": 38,
+  "EX": 0.9210526315789473,
+  "EX_ci95": [
+   0.792003210797347,
+   0.9727858986057349
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.90818706741616,
+   1.0
+  ],
+  "VES": 0.4512459032102401,
+  "tokens_mean": 6127.8421052631575,
+  "prompt_tokens_mean": 5888.315789473684,
+  "completion_tokens_mean": 239.52631578947367,
+  "calls_mean": 1,
+  "llm_ms_median": 2652.5,
+  "db_ms_median": 5.332865501259221,
+  "total_ms_median": 2664.919447000866,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "A_paraphrase": "12/12",
+   "B_variant": "8/8",
+   "C_analytic": "10/10",
+   "D_trap": "5/8"
+  }
+ }
+}

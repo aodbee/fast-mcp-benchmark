@@ -1,0 +1,10 @@
+{
+ "model": "gemini-3.8-flash",
+ "provider": "gemini",
+ "MAX_TOKENS": 16384,
+ "REQUEST_TIMEOUT_SECONDS": 150,
+ "temperature": 0.0,
+ "workers": 8,
+ "n_in_scope_per_system": 60,
+ "note": "env vars exported in shell, not stored in .env"
+}
