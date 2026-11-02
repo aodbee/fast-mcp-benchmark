@@ -1,0 +1,9 @@
+{
+ "backend": "agy (agy --mode plan --sandbox -p, default model; model name not reported by agy)",
+ "DEFINE_DELAYED": 1,
+ "REACT_DDL": 1,
+ "REACT_MAX_TURNS": 15,
+ "workers": 8,
+ "n_in_scope_per_system": 60,
+ "note": "tokens include ~9.5k agent overhead per call; not comparable with the Gemini API run"
+}

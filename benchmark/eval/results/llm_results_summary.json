@@ -1,0 +1,229 @@
+{
+ "dail_sql_style": {
+  "n": 60,
+  "EX": 1.0,
+  "EX_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 1.0532937588520495,
+  "tokens_mean": 1987.3666666666666,
+  "prompt_tokens_mean": 1301.4333333333334,
+  "completion_tokens_mean": 146.9,
+  "calls_mean": 1,
+  "llm_ms_median": 5696.6,
+  "db_ms_median": 5.283361500005412,
+  "total_ms_median": 5704.988634999847,
+  "llm_errors": 0,
+  "retries": 1,
+  "EX_by_intent": {
+   "delayed_projects": "31/31",
+   "department_summary": "21/21",
+   "staff_advances": "8/8"
+  }
+ },
+ "db_gpt_hub_style": {
+  "n": 60,
+  "EX": 0.8833333333333333,
+  "EX_ci95": [
+   0.7782097940014185,
+   0.9423235259654994
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 0.8964874550155459,
+  "tokens_mean": 4004.75,
+  "prompt_tokens_mean": 701.25,
+  "completion_tokens_mean": 210.01666666666668,
+  "calls_mean": 1,
+  "llm_ms_median": 24435.76,
+  "db_ms_median": 6.0660204999294365,
+  "total_ms_median": 24448.87807099955,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "delayed_projects": "24/31",
+   "department_summary": "21/21",
+   "staff_advances": "8/8"
+  }
+ },
+ "din_sql_style": {
+  "n": 60,
+  "EX": 0.7666666666666667,
+  "EX_ci95": [
+   0.6456348865960799,
+   0.8556056838156892
+  ],
+  "VSR": 0.9666666666666667,
+  "VSR_ci95": [
+   0.8863601247107462,
+   0.9908108735098499
+  ],
+  "VES": 0.6758305281664596,
+  "tokens_mean": 11453.75,
+  "prompt_tokens_mean": 2227.8,
+  "completion_tokens_mean": 621.4666666666667,
+  "calls_mean": 4,
+  "llm_ms_median": 63062.125,
+  "db_ms_median": 7.470928000202548,
+  "total_ms_median": 63070.38150300021,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "delayed_projects": "20/31",
+   "department_summary": "21/21",
+   "staff_advances": "5/8"
+  }
+ },
+ "fast_mcp": {
+  "n": 60,
+  "EX": 1.0,
+  "EX_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 1.0323497837567956,
+  "tokens_mean": 695.9,
+  "prompt_tokens_mean": 431.25,
+  "completion_tokens_mean": 51.45,
+  "calls_mean": 1,
+  "llm_ms_median": 3828.29,
+  "db_ms_median": 5.890714000088337,
+  "total_ms_median": 3831.6924185006274,
+  "llm_errors": 0,
+  "retries": 1,
+  "EX_by_intent": {
+   "delayed_projects": "31/31",
+   "department_summary": "21/21",
+   "staff_advances": "8/8"
+  },
+  "tool_selection_acc": 1.0,
+  "argument_acc": 1.0,
+  "out_of_scope_abstain": "9/9"
+ },
+ "langchain_react_style": {
+  "n": 60,
+  "EX": 0.13333333333333333,
+  "EX_ci95": [
+   0.06914026978309641,
+   0.241653945900721
+  ],
+  "VSR": 0.8,
+  "VSR_ci95": [
+   0.6821795390818299,
+   0.8817161026314104
+  ],
+  "VES": 0.13909526170237987,
+  "tokens_mean": 13031.683333333332,
+  "prompt_tokens_mean": 6538.683333333333,
+  "completion_tokens_mean": 4327.45,
+  "calls_mean": 7.833333333333333,
+  "llm_ms_median": 43560.965000000004,
+  "db_ms_median": 0.07014300035734777,
+  "total_ms_median": 43561.12673550012,
+  "llm_errors": 0,
+  "retries": 1,
+  "EX_by_intent": {
+   "delayed_projects": "0/31",
+   "department_summary": "6/21",
+   "staff_advances": "2/8"
+  }
+ },
+ "mac_sql_style": {
+  "n": 60,
+  "EX": 0.8833333333333333,
+  "EX_ci95": [
+   0.7782097940014185,
+   0.9423235259654994
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 0.791106661023498,
+  "tokens_mean": 4969.05,
+  "prompt_tokens_mean": 970.2166666666667,
+  "completion_tokens_mean": 759.2666666666667,
+  "calls_mean": 2.1666666666666665,
+  "llm_ms_median": 22382.845,
+  "db_ms_median": 5.44160150047901,
+  "total_ms_median": 22385.988571499547,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "delayed_projects": "24/31",
+   "department_summary": "21/21",
+   "staff_advances": "8/8"
+  }
+ },
+ "naive_sql": {
+  "n": 60,
+  "EX": 0.9333333333333333,
+  "EX_ci95": [
+   0.8407442010623228,
+   0.9737717258568019
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 0.9426518634008247,
+  "tokens_mean": 5498.866666666667,
+  "prompt_tokens_mean": 617.25,
+  "completion_tokens_mean": 207.5,
+  "calls_mean": 1,
+  "llm_ms_median": 28751.574999999997,
+  "db_ms_median": 5.463477499688452,
+  "total_ms_median": 28756.97472100023,
+  "llm_errors": 0,
+  "retries": 1,
+  "EX_by_intent": {
+   "delayed_projects": "28/31",
+   "department_summary": "21/21",
+   "staff_advances": "7/8"
+  }
+ },
+ "vanna_style": {
+  "n": 60,
+  "EX": 1.0,
+  "EX_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VSR": 1.0,
+  "VSR_ci95": [
+   0.939826069522067,
+   0.9999999999999998
+  ],
+  "VES": 1.0486660308280944,
+  "tokens_mean": 1908.6333333333334,
+  "prompt_tokens_mean": 1158.2333333333333,
+  "completion_tokens_mean": 158.26666666666668,
+  "calls_mean": 1,
+  "llm_ms_median": 6136.87,
+  "db_ms_median": 4.934994999985065,
+  "total_ms_median": 6151.301141499699,
+  "llm_errors": 0,
+  "retries": 0,
+  "EX_by_intent": {
+   "delayed_projects": "31/31",
+   "department_summary": "21/21",
+   "staff_advances": "8/8"
+  }
+ }
+}

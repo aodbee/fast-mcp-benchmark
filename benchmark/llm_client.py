@@ -201,7 +201,7 @@ class LLMClient:
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": 0.0,
-                "maxOutputTokens": 4096
+                "maxOutputTokens": int(os.environ.get("MAX_TOKENS", "4096"))
             }
         }
         if system_prompt:

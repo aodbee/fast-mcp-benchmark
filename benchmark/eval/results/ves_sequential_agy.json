@@ -1,0 +1,50 @@
+{
+ "dail_sql_style": {
+  "n": 60,
+  "correct": 60,
+  "VES": 1.038524350246081,
+  "mean_ratio_correct_only": 1.038524350246081
+ },
+ "db_gpt_hub_style": {
+  "n": 60,
+  "correct": 59,
+  "VES": 1.0009612407841955,
+  "mean_ratio_correct_only": 1.0179266855432498
+ },
+ "din_sql_style": {
+  "n": 60,
+  "correct": 55,
+  "VES": 0.8953481929653585,
+  "mean_ratio_correct_only": 0.9767434832349365
+ },
+ "fast_mcp": {
+  "n": 60,
+  "correct": 60,
+  "VES": 1.011301059516675,
+  "mean_ratio_correct_only": 1.011301059516675
+ },
+ "langchain_react_style": {
+  "n": 60,
+  "correct": 60,
+  "VES": 1.0038361218941512,
+  "mean_ratio_correct_only": 1.0038361218941512
+ },
+ "mac_sql_style": {
+  "n": 60,
+  "correct": 55,
+  "VES": 0.8729059117771906,
+  "mean_ratio_correct_only": 0.9522609946660262
+ },
+ "naive_sql": {
+  "n": 60,
+  "correct": 60,
+  "VES": 1.0050240693111114,
+  "mean_ratio_correct_only": 1.0050240693111114
+ },
+ "vanna_style": {
+  "n": 60,
+  "correct": 60,
+  "VES": 1.060781022806128,
+  "mean_ratio_correct_only": 1.060781022806128
+ }
+}

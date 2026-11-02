@@ -1,0 +1,2876 @@
+{
+ "scope": "60 in-scope questions x 8 systems, last record per (system,qid)",
+ "correct_counts": {
+  "db_gpt_hub_style": 53,
+  "fast_mcp": 60,
+  "vanna_style": 60,
+  "naive_sql": 56,
+  "din_sql_style": 46,
+  "langchain_react_style": 8,
+  "dail_sql_style": 60,
+  "mac_sql_style": 53
+ },
+ "wrong_by_category": {
+  "db_gpt_hub_style": {
+   "ROW_COUNT_MISMATCH": 7
+  },
+  "din_sql_style": {
+   "ROW_COUNT_MISMATCH": 7,
+   "VALUE_MISMATCH": 3,
+   "FRAGMENT_EXTRACTION": 2,
+   "EMPTY_RESULT": 2
+  },
+  "langchain_react_style": {
+   "EXPLORATORY_QUERY": 40,
+   "NO_QUERY": 12
+  },
+  "mac_sql_style": {
+   "ROW_COUNT_MISMATCH": 7
+  },
+  "naive_sql": {
+   "VALUE_MISMATCH": 1,
+   "ROW_COUNT_MISMATCH": 3
+  }
+ },
+ "fast_mcp": "0 wrong (60/60); dail_sql_style 0 wrong; vanna_style 0 wrong",
+ "semantic_cause_counts": {
+  "db_gpt_hub_style": {
+   "extra_filter_is_completed": 7
+  },
+  "din_sql_style": {
+   "extra_filter_is_completed": 9,
+   "dept_filter_on_projects_table": 4,
+   "field:staff_name": 3,
+   "field:doc_no": 3,
+   "field:amount": 3,
+   "chain_join_item_activity_project": 2,
+   "group_by_code/name": 1
+  },
+  "langchain_react_style": {
+   "no_LIMIT_10": 5,
+   "no_aggregation_per_project": 4,
+   "no_ORDER_BY": 1
+  },
+  "mac_sql_style": {
+   "extra_filter_is_completed": 7,
+   "remain_filter_in_WHERE_not_HAVING(row-level)": 1,
+   "dept_filter_on_projects_table": 1,
+   "group_by_code/name": 1
+  },
+  "naive_sql": {
+   "extra_filter_is_completed": 3,
+   "field:dept_code": 1,
+   "group_by_code/name": 1
+  }
+ },
+ "counterfactual_remove_is_completed": {
+  "db_gpt_hub_style": {
+   "now_correct": 7,
+   "of": 7
+  },
+  "din_sql_style": {
+   "now_correct": 9,
+   "of": 10
+  },
+  "mac_sql_style": {
+   "now_correct": 7,
+   "of": 7
+  },
+  "naive_sql": {
+   "now_correct": 3,
+   "of": 3
+  }
+ },
+ "react": {
+  "wrong": 52,
+  "calls_eq_8": 49,
+  "by_cat": {
+   "EXPLORATORY_QUERY": 40,
+   "NO_QUERY": 12
+  }
+ },
+ "other_findings": {
+  "chain_vs_ledger_project_id": "0/800000 ledger rows have chain (item->activity->project) project != ts.project_id; so gold chain path == ledger project_id path; no join-path trap",
+  "approval_forms_dept_vs_staff_dept": "19033/20000 forms have form.dept_code != staff.dept_code; glossary resolves; filtering on form dept is a model error",
+  "empty_gold": "5/31 delayed_projects gold sets are empty (q012,q023,q031,q036,q050) and 7 have a single row: empty-result queries pass trivially; 5/60 items (8.3%) have no discriminating power",
+  "delayed_def": "'delayed' is defined nowhere in the baseline prompts (glossary); the Fast-MCP tool description alone encodes 'remaining > threshold'. Demos in dail/vanna encode the gold semantics. 27 of 32 non-ReAct failures contain an extra is_completed=0 filter; 26 of them (all executable ones) match gold once that filter is removed.",
+  "scoring_permissiveness": "ex_match matches gold values to ANY column of a generated row (column identity ignored), 0.011 tolerance; swapped net/used would pass; no false negatives found from tolerance/LIMIT ties among wrong answers",
+  "demos": "2 of 140 questions (q086,q103) are verbatim DEMOS questions but are outside the 60 evaluated; 36/60 evaluated questions share a dept code with a demo (only 20 dept codes exist)"
+ },
+ "leakage": {
+  "dail_sql_style": {
+   "correct": 60,
+   "identical_after_param_norm": 60,
+   "ge90": 60,
+   "ge80": 60,
+   "mean": 1.0,
+   "min": 1.0
+  },
+  "vanna_style": {
+   "correct": 60,
+   "identical_after_param_norm": 43,
+   "ge90": 60,
+   "ge80": 60,
+   "mean": 0.993,
+   "min": 0.959
+  }
+ },
+ "spot_checks": {
+  "db_gpt_hub_style": [
+   {
+    "qid": "q006",
+    "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10130000' AND ts.fiscal_ye",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1013-0126",
+     "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+     "net_budget": 53131275.87,
+     "used_budget": 28413715.95,
+     "remain_budget": 24717559.92,
+     "burn_rate": 53.48
+    },
+    "got_first": [
+     "PRJ-1013-0126",
+     "Strategic Initiative 126 (Faculty / Division 13)",
+     53131275.87,
+     28413715.95,
+     24717559.92,
+     53.48
+    ],
+    "n_got": 9,
+    "n_gold": 10,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q028",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10170000' AND ts.fiscal_ye",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 5,
+    "n_gold": 6,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q032",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10170000' AND ts.fiscal_ye",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 7,
+    "n_gold": 8,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q038",
+    "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects AS p JOIN transaction_statement AS ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10180000' AND ts.fis",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1018-0180",
+     "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+     "net_budget": 51658779.85,
+     "used_budget": 27284356.38,
+     "remain_budget": 24374423.47,
+     "burn_rate": 52.82
+    },
+    "got_first": [
+     "PRJ-1018-0180",
+     "Strategic Initiative 180 (Faculty / Division 18)",
+     51658779.85,
+     27284356.38,
+     24374423.47,
+     52.82
+    ],
+    "n_got": 3,
+    "n_gold": 4,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q044",
+    "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects AS p JOIN transaction_statement AS ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10160000' AND ts.fis",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1016-0157",
+     "project_name": "Strategic Initiative 157 (Faculty / Division 16)",
+     "net_budget": 51163488.33,
+     "used_budget": 26846770.3,
+     "remain_budget": 24316718.03,
+     "burn_rate": 52.47
+    },
+    "got_first": [
+     "PRJ-1016-0157",
+     "Strategic Initiative 157 (Faculty / Division 16)",
+     51163488.33,
+     26846770.3,
+     24316718.03,
+     52.47
+    ],
+    "n_got": 4,
+    "n_gold": 5,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   }
+  ],
+  "din_sql_style": [
+   {
+    "qid": "q006",
+    "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND( SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2 ) AS burn_rate FROM projects AS p JOIN transaction_statement AS ts ON p.project_id = ts.project_id WHERE p.dept_code = '10130000' AND p.fis",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1013-0126",
+     "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+     "net_budget": 53131275.87,
+     "used_budget": 28413715.95,
+     "remain_budget": 24717559.92,
+     "burn_rate": 53.48
+    },
+    "got_first": [
+     "PRJ-1013-0126",
+     "Strategic Initiative 126 (Faculty / Division 13)",
+     53131275.87,
+     28413715.95,
+     24717559.92,
+     53.48
+    ],
+    "n_got": 9,
+    "n_gold": 10,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q010",
+    "question": "Reconcile the approval forms of staff in department 10040000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+    "sql": "SELECT T2.full_name, T1.dept_code, T1.doc_no, T1.amount FROM approval_forms AS T1 JOIN staff_users AS T2 ON T1.staff_id = T2.staff_id WHERE T1.dept_code = '10040000' ORDER BY T1.amount DESC LIMIT 10",
+    "category": "VALUE_MISMATCH",
+    "gold_first": {
+     "staff_name": "Staff FullName 969",
+     "dept_code": "10040000",
+     "doc_no": "DOC-2569-019535",
+     "amount": 79955.73
+    },
+    "got_first": [
+     "Staff FullName 281",
+     "10040000",
+     "DOC-2569-003058",
+     79763.65
+    ],
+    "n_got": 10,
+    "n_gold": 10,
+    "verdict": "model error: ignored glossary (filtered approval_forms.dept_code, which differs from staff dept for 95% of forms)"
+   },
+   {
+    "qid": "q036",
+    "question": "List the delayed projects of department 10060000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "WHERE t.dept_code = '10060000' AND t.fiscal_year = 2026 AND t.month = 1 AND a.is_completed = 0",
+    "category": "FRAGMENT_EXTRACTION",
+    "gold_first": null,
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 0,
+    "verdict": "model error / possible extraction problem: stored SQL is a fragment (sql_of takes first code block; raw text not stored)"
+   },
+   {
+    "qid": "q054",
+    "question": "List the delayed projects of department 10120000 in fiscal year 2026, month 5, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN activities a ON p.project_id = a.project_id JOIN expense_items ei ON a.activity_id = ei.activity_id JOIN tra",
+    "category": "EMPTY_RESULT",
+    "gold_first": {
+     "project_code": "PRJ-1012-0114",
+     "project_name": "Strategic Initiative 114 (Faculty / Division 12)",
+     "net_budget": 49654102.28,
+     "used_budget": 25946253.34,
+     "remain_budget": 23707848.94,
+     "burn_rate": 52.25
+    },
+    "got_first": null,
+    "n_got": 0,
+    "n_gold": 5,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q011",
+    "question": "Reconcile the approval forms of staff in department 10190000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+    "sql": "SELECT t2.full_name, t1.dept_code, t1.doc_no, t1.amount FROM approval_forms AS t1 JOIN staff_users AS t2 ON t1.staff_id = t2.staff_id WHERE t1.dept_code = '10190000' ORDER BY t1.amount DESC LIMIT 10",
+    "category": "VALUE_MISMATCH",
+    "gold_first": {
+     "staff_name": "Staff FullName 317",
+     "dept_code": "10190000",
+     "doc_no": "DOC-2569-012227",
+     "amount": 79699.81
+    },
+    "got_first": [
+     "Staff FullName 441",
+     "10190000",
+     "DOC-2569-010406",
+     79761.26
+    ],
+    "n_got": 10,
+    "n_gold": 10,
+    "verdict": "model error: ignored glossary (filtered approval_forms.dept_code, which differs from staff dept for 95% of forms)"
+   }
+  ],
+  "langchain_react_style": [
+   {
+    "qid": "q006",
+    "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "",
+    "category": "NO_QUERY",
+    "gold_first": {
+     "project_code": "PRJ-1013-0126",
+     "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+     "net_budget": 53131275.87,
+     "used_budget": 28413715.95,
+     "remain_budget": 24717559.92,
+     "burn_rate": 53.48
+    },
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 10,
+    "verdict": "harness-limited agent: ReAct loop ended (8-step cap, 5-row observations) before the target query; answer is a schema-probe, not an attempt -> model/agent failure, but partly an artefact of the step budget"
+   },
+   {
+    "qid": "q026",
+    "question": "List the delayed projects of department 10200000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "",
+    "category": "NO_QUERY",
+    "gold_first": {
+     "project_code": "PRJ-1020-0194",
+     "project_name": "Strategic Initiative 194 (Faculty / Division 20)",
+     "net_budget": 53007086.86,
+     "used_budget": 28076897.49,
+     "remain_budget": 24930189.37,
+     "burn_rate": 52.97
+    },
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 1,
+    "verdict": "harness-limited agent: ReAct loop ended (8-step cap, 5-row observations) before the target query; answer is a schema-probe, not an attempt -> model/agent failure, but partly an artefact of the step budget"
+   },
+   {
+    "qid": "q001",
+    "question": "Reconcile the approval forms of staff in department 10110000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+    "sql": "SELECT name, sql FROM sqlite_master WHERE type='table' LIMIT 10 OFFSET 5",
+    "category": "EXPLORATORY_QUERY",
+    "gold_first": {
+     "staff_name": "Staff FullName 794",
+     "dept_code": "10110000",
+     "doc_no": "DOC-2569-018533",
+     "amount": 79964.02
+    },
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 10,
+    "verdict": "harness-limited agent: ReAct loop ended (8-step cap, 5-row observations) before the target query; answer is a schema-probe, not an attempt -> model/agent failure, but partly an artefact of the step budget"
+   },
+   {
+    "qid": "q025",
+    "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+    "category": "EXPLORATORY_QUERY",
+    "gold_first": {
+     "project_code": "PRJ-1019-0190",
+     "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+     "net_budget": 49717886.79,
+     "used_budget": 25944521.23,
+     "remain_budget": 23773365.56,
+     "burn_rate": 52.18
+    },
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 7,
+    "verdict": "harness-limited agent: ReAct loop ended (8-step cap, 5-row observations) before the target query; answer is a schema-probe, not an attempt -> model/agent failure, but partly an artefact of the step budget"
+   },
+   {
+    "qid": "q045",
+    "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10010000, 10090000, 10170000 for fiscal year 2026, March (month 3). Show one row per department with departmen",
+    "sql": "PRAGMA table_info(transaction_statement)",
+    "category": "EXPLORATORY_QUERY",
+    "gold_first": {
+     "dept_code": "10010000",
+     "net_budget": 492949106.98,
+     "used_budget": 272927115.51,
+     "remain_budget": 220021991.47,
+     "burn_rate": 55.37
+    },
+    "got_first": null,
+    "n_got": null,
+    "n_gold": 3,
+    "verdict": "harness-limited agent: ReAct loop ended (8-step cap, 5-row observations) before the target query; answer is a schema-probe, not an attempt -> model/agent failure, but partly an artefact of the step budget"
+   }
+  ],
+  "mac_sql_style": [
+   {
+    "qid": "q006",
+    "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / NULLIF(SUM(CAST(ts.net_budget AS REAL)), 0), 2) AS burn_rate FROM transaction_statement ts JOIN projects p ON ts.project_id = p.project_id WHERE ts.dept_code = '10130000' AND t",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1013-0126",
+     "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+     "net_budget": 53131275.87,
+     "used_budget": 28413715.95,
+     "remain_budget": 24717559.92,
+     "burn_rate": 53.48
+    },
+    "got_first": [
+     "PRJ-1013-0126",
+     "Strategic Initiative 126 (Faculty / Division 13)",
+     53131275.87,
+     28413715.95,
+     24717559.92,
+     53.48
+    ],
+    "n_got": 9,
+    "n_gold": 10,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q025",
+    "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, t.net_budget, t.used_budget, t.remain_budget AS remaining_budget, ROUND(t.used_budget * 100.0 / t.net_budget, 2) AS burn_rate FROM projects p JOIN ( SELECT project_id, SUM(CAST(net_budget AS REAL)) AS net_budget, SUM(CAST(used_budget AS REAL)) AS used_budget, SUM(CAST(remain_budget AS REAL)) AS remain_budget FROM transaction_statement WHERE dept_code = '10190000' AND fiscal_year",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1019-0190",
+     "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+     "net_budget": 49717886.79,
+     "used_budget": 25944521.23,
+     "remain_budget": 23773365.56,
+     "burn_rate": 52.18
+    },
+    "got_first": [
+     "PRJ-1019-0190",
+     "Strategic Initiative 190 (Faculty / Division 19)",
+     49717886.79,
+     25944521.23,
+     23773365.56,
+     52.18
+    ],
+    "n_got": 6,
+    "n_gold": 7,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q028",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(t.net_budget AS REAL)) AS net_budget, SUM(CAST(t.used_budget AS REAL)) AS used_budget, SUM(CAST(t.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(t.used_budget AS REAL)) * 100.0 / SUM(CAST(t.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement t ON p.project_id = t.project_id WHERE t.dept_code = '10170000' AND t.fiscal_year = 2026",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 5,
+    "n_gold": 6,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q032",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM transaction_statement ts JOIN projects p ON ts.project_id = p.project_id WHERE ts.dept_code = '10170000' AND ts.fiscal_year ",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 7,
+    "n_gold": 8,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q038",
+    "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(t.net_budget AS REAL)) AS net_budget, SUM(CAST(t.used_budget AS REAL)) AS used_budget, SUM(CAST(t.remain_budget AS REAL)) AS remaining_budget, ROUND(SUM(CAST(t.used_budget AS REAL)) * 100.0 / SUM(CAST(t.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement t ON p.project_id = t.project_id WHERE t.dept_code = '10180000' AND t.fiscal_year = 2026",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1018-0180",
+     "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+     "net_budget": 51658779.85,
+     "used_budget": 27284356.38,
+     "remain_budget": 24374423.47,
+     "burn_rate": 52.82
+    },
+    "got_first": [
+     "PRJ-1018-0180",
+     "Strategic Initiative 180 (Faculty / Division 18)",
+     51658779.85,
+     27284356.38,
+     24374423.47,
+     52.82
+    ],
+    "n_got": 3,
+    "n_gold": 4,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   }
+  ],
+  "naive_sql": [
+   {
+    "qid": "q019",
+    "question": "Reconcile the approval forms of staff in department 10120000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+    "sql": "SELECT su.full_name, af.dept_code, af.doc_no, af.amount FROM approval_forms af JOIN staff_users su ON af.staff_id = su.staff_id WHERE su.dept_code = '10120000' ORDER BY af.amount DESC LIMIT 10",
+    "category": "VALUE_MISMATCH",
+    "gold_first": {
+     "staff_name": "Staff FullName 960",
+     "dept_code": "10120000",
+     "doc_no": "DOC-2569-010757",
+     "amount": 79923.35
+    },
+    "got_first": [
+     "Staff FullName 960",
+     "10170000",
+     "DOC-2569-010757",
+     79923.35
+    ],
+    "n_got": 10,
+    "n_gold": 10,
+    "verdict": "model error, minor: outputs approval_forms.dept_code (differs from staff dept) as department column; rows identical; strict-but-defensible scoring (question says department code of the staff dept)"
+   },
+   {
+    "qid": "q025",
+    "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10190000' AND ts.fiscal_year ",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1019-0190",
+     "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+     "net_budget": 49717886.79,
+     "used_budget": 25944521.23,
+     "remain_budget": 23773365.56,
+     "burn_rate": 52.18
+    },
+    "got_first": [
+     "PRJ-1019-0190",
+     "Strategic Initiative 190 (Faculty / Division 19)",
+     49717886.79,
+     25944521.23,
+     23773365.56,
+     52.18
+    ],
+    "n_got": 6,
+    "n_gold": 7,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q028",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget, ROUND( SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2 ) AS burn_rate FROM projects AS p JOIN transaction_statement AS ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10170000' AND ts.f",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 5,
+    "n_gold": 6,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   },
+   {
+    "qid": "q032",
+    "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project nam",
+    "sql": "SELECT p.project_code, p.project_name, SUM(CAST(ts.net_budget AS REAL)) AS net_budget, SUM(CAST(ts.used_budget AS REAL)) AS used_budget, SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget, ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate FROM projects p JOIN transaction_statement ts ON p.project_id = ts.project_id WHERE ts.dept_code = '10170000' AND ts.fiscal_year ",
+    "category": "ROW_COUNT_MISMATCH",
+    "gold_first": {
+     "project_code": "PRJ-1017-0161",
+     "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+     "net_budget": 55282003.31,
+     "used_budget": 30021692.26,
+     "remain_budget": 25260311.05,
+     "burn_rate": 54.31
+    },
+    "got_first": [
+     "PRJ-1017-0161",
+     "Strategic Initiative 161 (Faculty / Division 17)",
+     55282003.31,
+     30021692.26,
+     25260311.05,
+     54.31
+    ],
+    "n_got": 7,
+    "n_gold": 8,
+    "verdict": "model error (glossary/ambiguity) - prompt never defines \"delayed\"; counterfactual without is_completed filter matches gold exactly -> possible spec ambiguity, not a scoring bug"
+   }
+  ]
+ },
+ "details": [
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q006",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 9 gold 10",
+   "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10130000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 3\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1013-0126",
+    "Strategic Initiative 126 (Faculty / Division 13)",
+    53131275.87,
+    28413715.95,
+    24717559.92,
+    53.48
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1013-0126",
+    "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+    "net_budget": 53131275.87,
+    "used_budget": 28413715.95,
+    "remain_budget": 24717559.92,
+    "burn_rate": 53.48
+   },
+   "n_got": 9,
+   "n_gold": 10,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q028",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 5 gold 6",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND p.project_id IN (SELECT project_id FROM activities WHERE is_completed = 0)\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 5,
+   "n_gold": 6,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q032",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 7 gold 8",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 7,
+   "n_gold": 8,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q038",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 3 gold 4",
+   "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects AS p\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10180000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 1\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1018-0180",
+    "Strategic Initiative 180 (Faculty / Division 18)",
+    51658779.85,
+    27284356.38,
+    24374423.47,
+    52.82
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1018-0180",
+    "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+    "net_budget": 51658779.85,
+    "used_budget": 27284356.38,
+    "remain_budget": 24374423.47,
+    "burn_rate": 52.82
+   },
+   "n_got": 3,
+   "n_gold": 4,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q044",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 4 gold 5",
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects AS p\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10160000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 7\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1016-0157",
+    "Strategic Initiative 157 (Faculty / Division 16)",
+    51163488.33,
+    26846770.3,
+    24316718.03,
+    52.47
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1016-0157",
+    "project_name": "Strategic Initiative 157 (Faculty / Division 16)",
+    "net_budget": 51163488.33,
+    "used_budget": 26846770.3,
+    "remain_budget": 24316718.03,
+    "burn_rate": 52.47
+   },
+   "n_got": 4,
+   "n_gold": 5,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q053",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 8 gold 10",
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10160000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 2\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1016-0158",
+    "Strategic Initiative 158 (Faculty / Division 16)",
+    50549295.32,
+    26302396.68,
+    24246898.64,
+    52.03
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1016-0158",
+    "project_name": "Strategic Initiative 158 (Faculty / Division 16)",
+    "net_budget": 50549295.32,
+    "used_budget": 26302396.68,
+    "remain_budget": 24246898.64,
+    "burn_rate": 52.03
+   },
+   "n_got": 8,
+   "n_gold": 10,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "db_gpt_hub_style",
+   "qid": "q056",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 7 gold 9",
+   "question": "List the delayed projects of department 10100000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM transaction_statement AS ts\nJOIN projects AS p ON ts.project_id = p.project_id\nWHERE ts.dept_code = '10100000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 12\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1010-0094",
+    "Strategic Initiative 94 (Faculty / Division 10)",
+    52619581.24,
+    28433023.67,
+    24186557.57,
+    54.04
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1010-0094",
+    "project_name": "Strategic Initiative 94 (Faculty / Division 10)",
+    "net_budget": 52619581.24,
+    "used_budget": 28433023.67,
+    "remain_budget": 24186557.57,
+    "burn_rate": 54.04
+   },
+   "n_got": 7,
+   "n_gold": 9,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q006",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "dept_filter_on_projects_table",
+    "group_by_code/name"
+   ],
+   "detail": "got 9 gold 10",
+   "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(\n    SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)),\n    2\n  ) AS burn_rate\nFROM projects AS p\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id\nWHERE\n  p.dept_code = '10130000'\n  AND p.fiscal_year = 2026\n  AND ts.dept_code = '10130000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 3\n  AND EXISTS (\n    SELECT 1\n    FROM activities AS a\n    WHERE a.project_id = p.project_id\n      AND a.is_completed = 0\n  )\nGROUP BY\n  p.project_id,\n  p.project_code,\n  p.project_name\nHAVING\n  SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY\n  remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1013-0126",
+    "Strategic Initiative 126 (Faculty / Division 13)",
+    53131275.87,
+    28413715.95,
+    24717559.92,
+    53.48
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1013-0126",
+    "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+    "net_budget": 53131275.87,
+    "used_budget": 28413715.95,
+    "remain_budget": 24717559.92,
+    "burn_rate": 53.48
+   },
+   "n_got": 9,
+   "n_gold": 10,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q010",
+   "intent": "staff_advances",
+   "category": "VALUE_MISMATCH",
+   "semantic": [],
+   "detail": [
+    "staff_name",
+    "doc_no",
+    "amount"
+   ],
+   "question": "Reconcile the approval forms of staff in department 10040000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT\n  T2.full_name,\n  T1.dept_code,\n  T1.doc_no,\n  T1.amount\nFROM approval_forms AS T1\nJOIN staff_users AS T2\n  ON T1.staff_id = T2.staff_id\nWHERE T1.dept_code = '10040000'\nORDER BY T1.amount DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "Staff FullName 281",
+    "10040000",
+    "DOC-2569-003058",
+    79763.65
+   ],
+   "gold_first": {
+    "staff_name": "Staff FullName 969",
+    "dept_code": "10040000",
+    "doc_no": "DOC-2569-019535",
+    "amount": 79955.73
+   },
+   "n_got": 10,
+   "n_gold": 10
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q011",
+   "intent": "staff_advances",
+   "category": "VALUE_MISMATCH",
+   "semantic": [],
+   "detail": [
+    "staff_name",
+    "doc_no",
+    "amount"
+   ],
+   "question": "Reconcile the approval forms of staff in department 10190000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT\n  t2.full_name,\n  t1.dept_code,\n  t1.doc_no,\n  t1.amount\nFROM approval_forms AS t1\nJOIN staff_users AS t2\n  ON t1.staff_id = t2.staff_id\nWHERE t1.dept_code = '10190000'\nORDER BY t1.amount DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "Staff FullName 441",
+    "10190000",
+    "DOC-2569-010406",
+    79761.26
+   ],
+   "gold_first": {
+    "staff_name": "Staff FullName 317",
+    "dept_code": "10190000",
+    "doc_no": "DOC-2569-012227",
+    "amount": 79699.81
+   },
+   "n_got": 10,
+   "n_gold": 10
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q019",
+   "intent": "staff_advances",
+   "category": "VALUE_MISMATCH",
+   "semantic": [],
+   "detail": [
+    "staff_name",
+    "doc_no",
+    "amount"
+   ],
+   "question": "Reconcile the approval forms of staff in department 10120000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT\n  T2.full_name,\n  T1.dept_code,\n  T1.doc_no,\n  T1.amount\nFROM approval_forms AS T1\nJOIN staff_users AS T2\n  ON T1.staff_id = T2.staff_id\nWHERE T1.dept_code = '10120000'\nORDER BY T1.amount DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "Staff FullName 990",
+    "10120000",
+    "DOC-2569-001837",
+    79687.52
+   ],
+   "gold_first": {
+    "staff_name": "Staff FullName 960",
+    "dept_code": "10120000",
+    "doc_no": "DOC-2569-010757",
+    "amount": 79923.35
+   },
+   "n_got": 10,
+   "n_gold": 10
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q025",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 6 gold 7",
+   "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n    p.project_code,\n    p.project_name,\n    SUM(CAST(REPLACE(ts.net_budget, ',', '') AS REAL)) AS net_budget,\n    SUM(CAST(REPLACE(ts.used_budget, ',', '') AS REAL)) AS used_budget,\n    SUM(CAST(REPLACE(ts.remain_budget, ',', '') AS REAL)) AS remaining_budget,\n    ROUND(SUM(CAST(REPLACE(ts.used_budget, ',', '') AS REAL)) * 100.0 / SUM(CAST(REPLACE(ts.net_budget, ',', '') AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10190000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 9\n  AND p.project_id IN (\n      SELECT project_id\n      FROM activities\n      WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING remaining_budget > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1019-0190",
+    "Strategic Initiative 190 (Faculty / Division 19)",
+    49717886.79,
+    25944521.23,
+    23773365.56,
+    52.18
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1019-0190",
+    "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+    "net_budget": 49717886.79,
+    "used_budget": 25944521.23,
+    "remain_budget": 23773365.56,
+    "burn_rate": 52.18
+   },
+   "n_got": 6,
+   "n_gold": 7,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q028",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 5 gold 6",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 5,
+   "n_gold": 6,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q032",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "dept_filter_on_projects_table"
+   ],
+   "detail": "got 7 gold 8",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE p.dept_code = '10170000'\n  AND ts.dept_code = '10170000'\n  AND p.fiscal_year = 2026\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND EXISTS (\n    SELECT 1\n    FROM activities a\n    WHERE a.project_id = p.project_id\n      AND a.is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 7,
+   "n_gold": 8,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q036",
+   "intent": "delayed_projects",
+   "category": "FRAGMENT_EXTRACTION",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10060000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "WHERE t.dept_code = '10060000'\n  AND t.fiscal_year = 2026\n  AND t.month = 1\n  AND a.is_completed = 0",
+   "error": "near \"WHERE\": syntax error",
+   "calls": 4,
+   "got_first": null,
+   "gold_first": null,
+   "n_got": null,
+   "n_gold": 0,
+   "cf_without_is_completed_correct": false
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q038",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "dept_filter_on_projects_table"
+   ],
+   "detail": "got 3 gold 4",
+   "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE p.dept_code = '10180000'\n  AND p.fiscal_year = 2026\n  AND ts.fiscal_year = 2026\n  AND ts.month = 1\n  AND EXISTS (\n    SELECT 1\n    FROM activities a\n    WHERE a.project_id = p.project_id\n      AND a.is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1018-0180",
+    "Strategic Initiative 180 (Faculty / Division 18)",
+    51658779.85,
+    27284356.38,
+    24374423.47,
+    52.82
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1018-0180",
+    "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+    "net_budget": 51658779.85,
+    "used_budget": 27284356.38,
+    "remain_budget": 24374423.47,
+    "burn_rate": 52.82
+   },
+   "n_got": 3,
+   "n_gold": 4,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q044",
+   "intent": "delayed_projects",
+   "category": "FRAGMENT_EXTRACTION",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "FROM projects AS p\nJOIN activities AS a\n  ON p.project_id = a.project_id\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id",
+   "error": "near \"FROM\": syntax error",
+   "calls": 4,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1016-0157",
+    "project_name": "Strategic Initiative 157 (Faculty / Division 16)",
+    "net_budget": 51163488.33,
+    "used_budget": 26846770.3,
+    "remain_budget": 24316718.03,
+    "burn_rate": 52.47
+   },
+   "n_got": null,
+   "n_gold": 5
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q053",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 8 gold 10",
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects AS p\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10160000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 2\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1016-0158",
+    "Strategic Initiative 158 (Faculty / Division 16)",
+    50549295.32,
+    26302396.68,
+    24246898.64,
+    52.03
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1016-0158",
+    "project_name": "Strategic Initiative 158 (Faculty / Division 16)",
+    "net_budget": 50549295.32,
+    "used_budget": 26302396.68,
+    "remain_budget": 24246898.64,
+    "burn_rate": 52.03
+   },
+   "n_got": 8,
+   "n_gold": 10,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q054",
+   "intent": "delayed_projects",
+   "category": "EMPTY_RESULT",
+   "semantic": [
+    "extra_filter_is_completed",
+    "chain_join_item_activity_project"
+   ],
+   "detail": null,
+   "question": "List the delayed projects of department 10120000 in fiscal year 2026, month 5, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN activities a ON p.project_id = a.project_id\nJOIN expense_items ei ON a.activity_id = ei.activity_id\nJOIN transaction_statement ts ON ei.item_id = ts.item_id\nWHERE ts.dept_code = '10120000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 5\n  AND a.is_completed = 0\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1012-0114",
+    "project_name": "Strategic Initiative 114 (Faculty / Division 12)",
+    "net_budget": 49654102.28,
+    "used_budget": 25946253.34,
+    "remain_budget": 23707848.94,
+    "burn_rate": 52.25
+   },
+   "n_got": 0,
+   "n_gold": 5,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q056",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "dept_filter_on_projects_table"
+   ],
+   "detail": "got 7 gold 9",
+   "question": "List the delayed projects of department 10100000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(REPLACE(ts.net_budget, ',', '') AS REAL)) AS net_budget,\n  SUM(CAST(REPLACE(ts.used_budget, ',', '') AS REAL)) AS used_budget,\n  SUM(CAST(REPLACE(ts.remain_budget, ',', '') AS REAL)) AS remaining_budget,\n  ROUND(\n    SUM(CAST(REPLACE(ts.used_budget, ',', '') AS REAL)) * 100.0 /\n    SUM(CAST(REPLACE(ts.net_budget, ',', '') AS REAL)),\n    2\n  ) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE p.dept_code = '10100000'\n  AND p.fiscal_year = 2026\n  AND ts.dept_code = '10100000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 12\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING remaining_budget > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": [
+    "PRJ-1010-0094",
+    "Strategic Initiative 94 (Faculty / Division 10)",
+    52619581.24,
+    28433023.67,
+    24186557.57,
+    54.04
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1010-0094",
+    "project_name": "Strategic Initiative 94 (Faculty / Division 10)",
+    "net_budget": 52619581.24,
+    "used_budget": 28433023.67,
+    "remain_budget": 24186557.57,
+    "burn_rate": 54.04
+   },
+   "n_got": 7,
+   "n_gold": 9,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "din_sql_style",
+   "qid": "q062",
+   "intent": "delayed_projects",
+   "category": "EMPTY_RESULT",
+   "semantic": [
+    "extra_filter_is_completed",
+    "chain_join_item_activity_project"
+   ],
+   "detail": null,
+   "question": "List the delayed projects of department 10020000 in fiscal year 2026, month 5, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects AS p\nJOIN activities AS a ON p.project_id = a.project_id\nJOIN expense_items AS ei ON a.activity_id = ei.activity_id\nJOIN transaction_statement AS ts ON ei.item_id = ts.item_id\nWHERE ts.dept_code = '10020000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 5\n  AND a.is_completed = 0\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 4,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1002-0011",
+    "project_name": "Strategic Initiative 11 (Faculty / Division 2)",
+    "net_budget": 46642360.12,
+    "used_budget": 24316472.49,
+    "remain_budget": 22325887.63,
+    "burn_rate": 52.13
+   },
+   "n_got": 0,
+   "n_gold": 3,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q001",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Reconcile the approval forms of staff in department 10110000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT name, sql FROM sqlite_master WHERE type='table' LIMIT 10 OFFSET 5",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "staff_name": "Staff FullName 794",
+    "dept_code": "10110000",
+    "doc_no": "DOC-2569-018533",
+    "amount": 79964.02
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q002",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10020000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1002-0014",
+    "project_name": "Strategic Initiative 14 (Faculty / Division 2)",
+    "net_budget": 56244646.73,
+    "used_budget": 30526982.67,
+    "remain_budget": 25717664.06,
+    "burn_rate": 54.28
+   },
+   "n_got": null,
+   "n_gold": 8
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q003",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10070000, 10120000, 10200000 for fiscal year 2026, December (month 12). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(transaction_statement)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10070000",
+    "net_budget": 478846965.07,
+    "used_budget": 262606056.88,
+    "remain_budget": 216240908.19,
+    "burn_rate": 54.84
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q006",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1013-0126",
+    "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+    "net_budget": 53131275.87,
+    "used_budget": 28413715.95,
+    "remain_budget": 24717559.92,
+    "burn_rate": 53.48
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q007",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [
+    "no_aggregation_per_project",
+    "no_LIMIT_10"
+   ],
+   "detail": [
+    "project_code",
+    "project_name",
+    "net_budget",
+    "used_budget",
+    "remain_budget",
+    "burn_rate"
+   ],
+   "question": "List the delayed projects of department 10050000 in fiscal year 2026, month 10, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT * FROM departments WHERE dept_code = '10050000' OR dept_id = 10050000",
+   "error": null,
+   "calls": 8,
+   "got_first": [
+    5,
+    "10050000",
+    "Faculty / Division 5",
+    "Administration",
+    12500000.0
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1005-0043",
+    "project_name": "Strategic Initiative 43 (Faculty / Division 5)",
+    "net_budget": 52606667.49,
+    "used_budget": 28512609.73,
+    "remain_budget": 24094057.76,
+    "burn_rate": 54.2
+   },
+   "n_got": 1,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q012",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10040000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": null,
+   "n_got": null,
+   "n_gold": 0
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q013",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10080000 in fiscal year 2026, month 10, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(activities)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1008-0078",
+    "project_name": "Strategic Initiative 78 (Faculty / Division 8)",
+    "net_budget": 52944707.24,
+    "used_budget": 28873130.49,
+    "remain_budget": 24071576.75,
+    "burn_rate": 54.53
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q014",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10090000 in fiscal year 2026, month 4, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1009-0090",
+    "project_name": "Strategic Initiative 90 (Faculty / Division 9)",
+    "net_budget": 52127671.36,
+    "used_budget": 28598383.52,
+    "remain_budget": 23529287.84,
+    "burn_rate": 54.86
+   },
+   "n_got": null,
+   "n_gold": 4
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q015",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10040000, 10080000 for fiscal year 2026, July (month 7). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name='transaction_statement'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10040000",
+    "net_budget": 474031498.32,
+    "used_budget": 263403000.52,
+    "remain_budget": 210628497.8,
+    "burn_rate": 55.57
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q016",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10030000, 10080000 for fiscal year 2026, January (month 1). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT * FROM transaction_statement LIMIT 5",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10030000",
+    "net_budget": 481404432.69,
+    "used_budget": 262874875.08,
+    "remain_budget": 218529557.61,
+    "burn_rate": 54.61
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q017",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Reconcile the approval forms of staff in department 10010000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "PRAGMA table_info(staff_users)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "staff_name": "Staff FullName 407",
+    "dept_code": "10010000",
+    "doc_no": "DOC-2569-011374",
+    "amount": 79510.26
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q018",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1016-0158",
+    "project_name": "Strategic Initiative 158 (Faculty / Division 16)",
+    "net_budget": 50549295.32,
+    "used_budget": 26302396.68,
+    "remain_budget": 24246898.64,
+    "burn_rate": 52.03
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q019",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [
+    "no_LIMIT_10",
+    "no_ORDER_BY"
+   ],
+   "detail": "got 5 gold 10",
+   "question": "Reconcile the approval forms of staff in department 10120000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT first_name, last_name FROM staff_users LIMIT 5",
+   "error": null,
+   "calls": 8,
+   "got_first": [
+    "FirstName_1",
+    "LastName_1"
+   ],
+   "gold_first": {
+    "staff_name": "Staff FullName 960",
+    "dept_code": "10120000",
+    "doc_no": "DOC-2569-010757",
+    "amount": 79923.35
+   },
+   "n_got": 5,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q021",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10020000, 10140000, 10150000 for fiscal year 2026, November (month 11). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name = 'transaction_statement'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10020000",
+    "net_budget": 477107431.91,
+    "used_budget": 261724452.23,
+    "remain_budget": 215382979.68,
+    "burn_rate": 54.86
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q022",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10100000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(activities)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1010-0092",
+    "project_name": "Strategic Initiative 92 (Faculty / Division 10)",
+    "net_budget": 50654769.42,
+    "used_budget": 26258018.38,
+    "remain_budget": 24396751.04,
+    "burn_rate": 51.84
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q023",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [
+    "no_aggregation_per_project",
+    "no_LIMIT_10"
+   ],
+   "detail": "got 20 gold 0",
+   "question": "List the delayed projects of department 10010000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT DISTINCT dept_code FROM transaction_statement",
+   "error": null,
+   "calls": 8,
+   "got_first": [
+    "10010000"
+   ],
+   "gold_first": null,
+   "n_got": 20,
+   "n_gold": 0
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q024",
+   "intent": "department_summary",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10050000, 10120000 for fiscal year 2026, March (month 3). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 6,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10050000",
+    "net_budget": 474911164.01,
+    "used_budget": 260991221.31,
+    "remain_budget": 213919942.7,
+    "burn_rate": 54.96
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q025",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1019-0190",
+    "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+    "net_budget": 49717886.79,
+    "used_budget": 25944521.23,
+    "remain_budget": 23773365.56,
+    "burn_rate": 52.18
+   },
+   "n_got": null,
+   "n_gold": 7
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q026",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10200000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1020-0194",
+    "project_name": "Strategic Initiative 194 (Faculty / Division 20)",
+    "net_budget": 53007086.86,
+    "used_budget": 28076897.49,
+    "remain_budget": 24930189.37,
+    "burn_rate": 52.97
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q028",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": null,
+   "n_gold": 6
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q029",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10010000, 10180000, 10190000 for fiscal year 2026, April (month 4). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(departments)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10010000",
+    "net_budget": 494934166.69,
+    "used_budget": 267999802.14,
+    "remain_budget": 226934364.55,
+    "burn_rate": 54.15
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q031",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10110000 in fiscal year 2026, month 8, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": null,
+   "n_got": null,
+   "n_gold": 0
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q032",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": null,
+   "n_gold": 8
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q033",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10080000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name IN ('projects', 'transaction_statement')",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1008-0080",
+    "project_name": "Strategic Initiative 80 (Faculty / Division 8)",
+    "net_budget": 50529264.61,
+    "used_budget": 26464622.55,
+    "remain_budget": 24064642.06,
+    "burn_rate": 52.37
+   },
+   "n_got": null,
+   "n_gold": 9
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q034",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10050000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1005-0041",
+    "project_name": "Strategic Initiative 41 (Faculty / Division 5)",
+    "net_budget": 51274229.37,
+    "used_budget": 27207111.67,
+    "remain_budget": 24067117.7,
+    "burn_rate": 53.06
+   },
+   "n_got": null,
+   "n_gold": 4
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q035",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10200000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1020-0195",
+    "project_name": "Strategic Initiative 195 (Faculty / Division 20)",
+    "net_budget": 53700532.88,
+    "used_budget": 29611311.39,
+    "remain_budget": 24089221.49,
+    "burn_rate": 55.14
+   },
+   "n_got": null,
+   "n_gold": 9
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q036",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10060000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": null,
+   "n_got": null,
+   "n_gold": 0
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q037",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10040000, 10070000, 10080000 for fiscal year 2026, April (month 4). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(departments)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10040000",
+    "net_budget": 490548643.97,
+    "used_budget": 272087748.12,
+    "remain_budget": 218460895.85,
+    "burn_rate": 55.47
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q038",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1018-0180",
+    "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+    "net_budget": 51658779.85,
+    "used_budget": 27284356.38,
+    "remain_budget": 24374423.47,
+    "burn_rate": 52.82
+   },
+   "n_got": null,
+   "n_gold": 4
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q039",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10150000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 7,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1015-0150",
+    "project_name": "Strategic Initiative 150 (Faculty / Division 15)",
+    "net_budget": 55162149.4,
+    "used_budget": 29590700.76,
+    "remain_budget": 25571448.64,
+    "burn_rate": 53.64
+   },
+   "n_got": null,
+   "n_gold": 5
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q041",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10080000, 10180000 for fiscal year 2026, March (month 3). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name='transaction_statement'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10080000",
+    "net_budget": 495175956.09,
+    "used_budget": 274061383.0,
+    "remain_budget": 221114573.09,
+    "burn_rate": 55.35
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q042",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10110000, 10200000 for fiscal year 2026, August (month 8). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(departments)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10110000",
+    "net_budget": 488410987.52,
+    "used_budget": 270677050.02,
+    "remain_budget": 217733937.5,
+    "burn_rate": 55.42
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q044",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [
+    "no_aggregation_per_project",
+    "no_LIMIT_10"
+   ],
+   "detail": "got 1 gold 5",
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT * FROM departments WHERE dept_code = '10160000' OR dept_id = 10160000",
+   "error": null,
+   "calls": 8,
+   "got_first": [
+    16,
+    "10160000",
+    "Faculty / Division 16",
+    "Academic",
+    18000000.0
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1016-0157",
+    "project_name": "Strategic Initiative 157 (Faculty / Division 16)",
+    "net_budget": 51163488.33,
+    "used_budget": 26846770.3,
+    "remain_budget": 24316718.03,
+    "burn_rate": 52.47
+   },
+   "n_got": 1,
+   "n_gold": 5
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q045",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10010000, 10090000, 10170000 for fiscal year 2026, March (month 3). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(transaction_statement)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10010000",
+    "net_budget": 492949106.98,
+    "used_budget": 272927115.51,
+    "remain_budget": 220021991.47,
+    "burn_rate": 55.37
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q046",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10120000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1012-0113",
+    "project_name": "Strategic Initiative 113 (Faculty / Division 12)",
+    "net_budget": 54155248.43,
+    "used_budget": 28599055.53,
+    "remain_budget": 25556192.9,
+    "burn_rate": 52.81
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q050",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10140000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": null,
+   "n_got": null,
+   "n_gold": 0
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q051",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10140000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name = 'projects'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1014-0139",
+    "project_name": "Strategic Initiative 139 (Faculty / Division 14)",
+    "net_budget": 53610766.09,
+    "used_budget": 28182605.49,
+    "remain_budget": 25428160.6,
+    "burn_rate": 52.57
+   },
+   "n_got": null,
+   "n_gold": 9
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q053",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(projects)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1016-0158",
+    "project_name": "Strategic Initiative 158 (Faculty / Division 16)",
+    "net_budget": 50549295.32,
+    "used_budget": 26302396.68,
+    "remain_budget": 24246898.64,
+    "burn_rate": 52.03
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q054",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10120000 in fiscal year 2026, month 5, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1012-0114",
+    "project_name": "Strategic Initiative 114 (Faculty / Division 12)",
+    "net_budget": 49654102.28,
+    "used_budget": 25946253.34,
+    "remain_budget": 23707848.94,
+    "burn_rate": 52.25
+   },
+   "n_got": null,
+   "n_gold": 5
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q055",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10070000, 10130000, 10160000 for fiscal year 2026, November (month 11). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(transaction_statement)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10070000",
+    "net_budget": 488456322.85,
+    "used_budget": 270217983.21,
+    "remain_budget": 218238339.64,
+    "burn_rate": 55.32
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q056",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10100000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1010-0094",
+    "project_name": "Strategic Initiative 94 (Faculty / Division 10)",
+    "net_budget": 52619581.24,
+    "used_budget": 28433023.67,
+    "remain_budget": 24186557.57,
+    "burn_rate": 54.04
+   },
+   "n_got": null,
+   "n_gold": 9
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q057",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10050000, 10090000, 10200000 for fiscal year 2026, April (month 4). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(transaction_statement)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10050000",
+    "net_budget": 514258051.39,
+    "used_budget": 280442046.53,
+    "remain_budget": 233816004.86,
+    "burn_rate": 54.53
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q058",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [
+    "no_aggregation_per_project",
+    "no_LIMIT_10"
+   ],
+   "detail": "got 1 gold 10",
+   "question": "List the delayed projects of department 10070000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT dept_id, dept_code, dept_name FROM departments WHERE dept_code = '10070000' OR dept_id = 10070000",
+   "error": null,
+   "calls": 8,
+   "got_first": [
+    7,
+    "10070000",
+    "Faculty / Division 7"
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1007-0070",
+    "project_name": "Strategic Initiative 70 (Faculty / Division 7)",
+    "net_budget": 52668528.86,
+    "used_budget": 28817057.71,
+    "remain_budget": 23851471.15,
+    "burn_rate": 54.71
+   },
+   "n_got": 1,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q059",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10030000, 10160000 for fiscal year 2026, February (month 2). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE name='transaction_statement'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10030000",
+    "net_budget": 492009282.75,
+    "used_budget": 271223389.55,
+    "remain_budget": 220785893.2,
+    "burn_rate": 55.13
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q061",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Reconcile the approval forms of staff in department 10030000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "PRAGMA table_info(approval_forms)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "staff_name": "Staff FullName 509",
+    "dept_code": "10030000",
+    "doc_no": "DOC-2569-012895",
+    "amount": 79999.16
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q062",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10020000 in fiscal year 2026, month 5, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT name, sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1002-0011",
+    "project_name": "Strategic Initiative 11 (Faculty / Division 2)",
+    "net_budget": 46642360.12,
+    "used_budget": 24316472.49,
+    "remain_budget": 22325887.63,
+    "burn_rate": 52.13
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q063",
+   "intent": "delayed_projects",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT sql FROM sqlite_master WHERE type='table'",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1019-0188",
+    "project_name": "Strategic Initiative 188 (Faculty / Division 19)",
+    "net_budget": 53544624.8,
+    "used_budget": 28708244.92,
+    "remain_budget": 24836379.88,
+    "burn_rate": 53.62
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q064",
+   "intent": "delayed_projects",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "List the delayed projects of department 10150000 in fiscal year 2026, month 2, whose remaining unspent budget exceeds 23,925,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "project_code": "PRJ-1015-0143",
+    "project_name": "Strategic Initiative 143 (Faculty / Division 15)",
+    "net_budget": 53621858.55,
+    "used_budget": 28851212.22,
+    "remain_budget": 24770646.33,
+    "burn_rate": 53.8
+   },
+   "n_got": null,
+   "n_gold": 1
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q065",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Reconcile the approval forms of staff in department 10180000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "PRAGMA table_info(staff_users)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "staff_name": "Staff FullName 390",
+    "dept_code": "10180000",
+    "doc_no": "DOC-2569-002605",
+    "amount": 79943.14
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q066",
+   "intent": "department_summary",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10130000, 10140000, 10190000 for fiscal year 2026, June (month 6). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "PRAGMA table_info(transaction_statement)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10130000",
+    "net_budget": 480739391.12,
+    "used_budget": 258143065.58,
+    "remain_budget": 222596325.54,
+    "burn_rate": 53.7
+   },
+   "n_got": null,
+   "n_gold": 3
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q067",
+   "intent": "department_summary",
+   "category": "NO_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Compare net budget, disbursed amount, remaining balance and burn rate between departments 10010000, 10030000 for fiscal year 2026, December (month 12). Show one row per department with department code, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "",
+   "error": "no sql produced",
+   "calls": 6,
+   "got_first": null,
+   "gold_first": {
+    "dept_code": "10010000",
+    "net_budget": 476844948.16,
+    "used_budget": 261707969.66,
+    "remain_budget": 215136978.5,
+    "burn_rate": 54.88
+   },
+   "n_got": null,
+   "n_gold": 2
+  },
+  {
+   "system": "langchain_react_style",
+   "qid": "q069",
+   "intent": "staff_advances",
+   "category": "EXPLORATORY_QUERY",
+   "semantic": [],
+   "detail": null,
+   "question": "Reconcile the approval forms of staff in department 10090000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "PRAGMA table_info(staff_users)",
+   "error": null,
+   "calls": 8,
+   "got_first": null,
+   "gold_first": {
+    "staff_name": "Staff FullName 694",
+    "dept_code": "10090000",
+    "doc_no": "DOC-2569-015910",
+    "amount": 79954.14
+   },
+   "n_got": null,
+   "n_gold": 10
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q006",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 9 gold 10",
+   "question": "List the delayed projects of department 10130000 in fiscal year 2026, month 3, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n    ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / NULLIF(SUM(CAST(ts.net_budget AS REAL)), 0), 2) AS burn_rate\nFROM transaction_statement ts\nJOIN projects p ON ts.project_id = p.project_id\nWHERE ts.dept_code = '10130000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 3\n  AND p.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0 OR is_completed = '0'\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1013-0126",
+    "Strategic Initiative 126 (Faculty / Division 13)",
+    53131275.87,
+    28413715.95,
+    24717559.92,
+    53.48
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1013-0126",
+    "project_name": "Strategic Initiative 126 (Faculty / Division 13)",
+    "net_budget": 53131275.87,
+    "used_budget": 28413715.95,
+    "remain_budget": 24717559.92,
+    "burn_rate": 53.48
+   },
+   "n_got": 9,
+   "n_gold": 10,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q025",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "remain_filter_in_WHERE_not_HAVING(row-level)",
+    "dept_filter_on_projects_table"
+   ],
+   "detail": "got 6 gold 7",
+   "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n  p.project_code,\n  p.project_name,\n  t.net_budget,\n  t.used_budget,\n  t.remain_budget AS remaining_budget,\n  ROUND(t.used_budget * 100.0 / t.net_budget, 2) AS burn_rate\nFROM projects p\nJOIN (\n  SELECT \n    project_id,\n    SUM(CAST(net_budget AS REAL)) AS net_budget,\n    SUM(CAST(used_budget AS REAL)) AS used_budget,\n    SUM(CAST(remain_budget AS REAL)) AS remain_budget\n  FROM transaction_statement\n  WHERE dept_code = '10190000' \n    AND fiscal_year = 2026 \n    AND month = 9\n  GROUP BY project_id\n) t ON p.project_id = t.project_id\nWHERE p.dept_code = '10190000'\n  AND p.fiscal_year = 2026\n  AND p.project_id IN (\n    SELECT DISTINCT project_id \n    FROM activities \n    WHERE dept_code = '10190000' \n      AND fiscal_year = 2026 \n      AND is_completed = 0\n  )\n  AND t.remain_budget > 21750000\nORDER BY t.remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1019-0190",
+    "Strategic Initiative 190 (Faculty / Division 19)",
+    49717886.79,
+    25944521.23,
+    23773365.56,
+    52.18
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1019-0190",
+    "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+    "net_budget": 49717886.79,
+    "used_budget": 25944521.23,
+    "remain_budget": 23773365.56,
+    "burn_rate": 52.18
+   },
+   "n_got": 6,
+   "n_gold": 7,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q028",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 5 gold 6",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(t.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(t.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(t.remain_budget AS REAL)) AS remaining_budget,\n    ROUND(SUM(CAST(t.used_budget AS REAL)) * 100.0 / SUM(CAST(t.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement t \n    ON p.project_id = t.project_id\nWHERE t.dept_code = '10170000'\n  AND t.fiscal_year = 2026\n  AND t.month = 6\n  AND p.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING remaining_budget > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 5,
+   "n_gold": 6,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q032",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "group_by_code/name"
+   ],
+   "detail": "got 7 gold 8",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n    ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM transaction_statement ts\nJOIN projects p ON ts.project_id = p.project_id\nWHERE ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND ts.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0\n  )\nGROUP BY ts.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 7,
+   "n_gold": 8,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q038",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 3 gold 4",
+   "question": "List the delayed projects of department 10180000 in fiscal year 2026, month 1, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(t.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(t.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(t.remain_budget AS REAL)) AS remaining_budget,\n    ROUND(SUM(CAST(t.used_budget AS REAL)) * 100.0 / SUM(CAST(t.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement t \n    ON p.project_id = t.project_id\nWHERE t.dept_code = '10180000'\n  AND t.fiscal_year = 2026\n  AND t.month = 1\n  AND p.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(t.remain_budget AS REAL)) > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1018-0180",
+    "Strategic Initiative 180 (Faculty / Division 18)",
+    51658779.85,
+    27284356.38,
+    24374423.47,
+    52.82
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1018-0180",
+    "project_name": "Strategic Initiative 180 (Faculty / Division 18)",
+    "net_budget": 51658779.85,
+    "used_budget": 27284356.38,
+    "remain_budget": 24374423.47,
+    "burn_rate": 52.82
+   },
+   "n_got": 3,
+   "n_gold": 4,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q044",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 4 gold 5",
+   "question": "List the delayed projects of department 10160000 in fiscal year 2026, month 7, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(t.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(t.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(t.remain_budget AS REAL)) AS remaining_budget,\n    ROUND(SUM(CAST(t.used_budget AS REAL)) * 100.0 / SUM(CAST(t.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement t ON p.project_id = t.project_id\nWHERE t.dept_code = '10160000'\n  AND t.fiscal_year = 2026\n  AND t.month = 7\n  AND p.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING remaining_budget > 21750000\nORDER BY remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1016-0157",
+    "Strategic Initiative 157 (Faculty / Division 16)",
+    51163488.33,
+    26846770.3,
+    24316718.03,
+    52.47
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1016-0157",
+    "project_name": "Strategic Initiative 157 (Faculty / Division 16)",
+    "net_budget": 51163488.33,
+    "used_budget": 26846770.3,
+    "remain_budget": 24316718.03,
+    "burn_rate": 52.47
+   },
+   "n_got": 4,
+   "n_gold": 5,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "mac_sql_style",
+   "qid": "q056",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 7 gold 9",
+   "question": "List the delayed projects of department 10100000 in fiscal year 2026, month 12, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT \n    p.project_code,\n    p.project_name,\n    SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n    SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n    SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n    ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts \n    ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10100000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 12\n  AND p.project_id IN (\n      SELECT project_id \n      FROM activities \n      WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 2,
+   "got_first": [
+    "PRJ-1010-0094",
+    "Strategic Initiative 94 (Faculty / Division 10)",
+    52619581.24,
+    28433023.67,
+    24186557.57,
+    54.04
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1010-0094",
+    "project_name": "Strategic Initiative 94 (Faculty / Division 10)",
+    "net_budget": 52619581.24,
+    "used_budget": 28433023.67,
+    "remain_budget": 24186557.57,
+    "burn_rate": 54.04
+   },
+   "n_got": 7,
+   "n_gold": 9,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "naive_sql",
+   "qid": "q019",
+   "intent": "staff_advances",
+   "category": "VALUE_MISMATCH",
+   "semantic": [],
+   "detail": [
+    "dept_code"
+   ],
+   "question": "Reconcile the approval forms of staff in department 10120000: show the top 10 forms by amount with staff name, department code, document number and amount.",
+   "sql": "SELECT\n  su.full_name,\n  af.dept_code,\n  af.doc_no,\n  af.amount\nFROM approval_forms af\nJOIN staff_users su ON af.staff_id = su.staff_id\nWHERE su.dept_code = '10120000'\nORDER BY af.amount DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "Staff FullName 960",
+    "10170000",
+    "DOC-2569-010757",
+    79923.35
+   ],
+   "gold_first": {
+    "staff_name": "Staff FullName 960",
+    "dept_code": "10120000",
+    "doc_no": "DOC-2569-010757",
+    "amount": 79923.35
+   },
+   "n_got": 10,
+   "n_gold": 10
+  },
+  {
+   "system": "naive_sql",
+   "qid": "q025",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 6 gold 7",
+   "question": "List the delayed projects of department 10190000 in fiscal year 2026, month 9, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10190000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 9\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1019-0190",
+    "Strategic Initiative 190 (Faculty / Division 19)",
+    49717886.79,
+    25944521.23,
+    23773365.56,
+    52.18
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1019-0190",
+    "project_name": "Strategic Initiative 190 (Faculty / Division 19)",
+    "net_budget": 49717886.79,
+    "used_budget": 25944521.23,
+    "remain_budget": 23773365.56,
+    "burn_rate": 52.18
+   },
+   "n_got": 6,
+   "n_gold": 7,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "naive_sql",
+   "qid": "q028",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id",
+    "group_by_code/name"
+   ],
+   "detail": "got 5 gold 6",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 21,750,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remaining_budget,\n  ROUND(\n    SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)),\n    2\n  ) AS burn_rate\nFROM projects AS p\nJOIN transaction_statement AS ts\n  ON p.project_id = ts.project_id\nWHERE\n  ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND p.project_id IN (\n    SELECT\n      project_id\n    FROM activities\n    WHERE\n      is_completed = 0\n  )\nGROUP BY\n  p.project_id,\n  p.project_code,\n  p.project_name\nHAVING\n  SUM(CAST(ts.remain_budget AS REAL)) > 21750000\nORDER BY\n  remaining_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 5,
+   "n_gold": 6,
+   "cf_without_is_completed_correct": true
+  },
+  {
+   "system": "naive_sql",
+   "qid": "q032",
+   "intent": "delayed_projects",
+   "category": "ROW_COUNT_MISMATCH",
+   "semantic": [
+    "extra_filter_is_completed",
+    "join_via_ledger_project_id"
+   ],
+   "detail": "got 7 gold 8",
+   "question": "List the delayed projects of department 10170000 in fiscal year 2026, month 6, whose remaining unspent budget exceeds 19,575,000 THB. Show the top 10 by remaining budget with project code, project name, net budget, used budget, remaining budget and burn rate (used/net in %).",
+   "sql": "SELECT\n  p.project_code,\n  p.project_name,\n  SUM(CAST(ts.net_budget AS REAL)) AS net_budget,\n  SUM(CAST(ts.used_budget AS REAL)) AS used_budget,\n  SUM(CAST(ts.remain_budget AS REAL)) AS remain_budget,\n  ROUND(SUM(CAST(ts.used_budget AS REAL)) * 100.0 / SUM(CAST(ts.net_budget AS REAL)), 2) AS burn_rate\nFROM projects p\nJOIN transaction_statement ts ON p.project_id = ts.project_id\nWHERE ts.dept_code = '10170000'\n  AND ts.fiscal_year = 2026\n  AND ts.month = 6\n  AND p.project_id IN (\n    SELECT project_id\n    FROM activities\n    WHERE is_completed = 0\n  )\nGROUP BY p.project_id, p.project_code, p.project_name\nHAVING SUM(CAST(ts.remain_budget AS REAL)) > 19575000\nORDER BY remain_budget DESC\nLIMIT 10",
+   "error": null,
+   "calls": 1,
+   "got_first": [
+    "PRJ-1017-0161",
+    "Strategic Initiative 161 (Faculty / Division 17)",
+    55282003.31,
+    30021692.26,
+    25260311.05,
+    54.31
+   ],
+   "gold_first": {
+    "project_code": "PRJ-1017-0161",
+    "project_name": "Strategic Initiative 161 (Faculty / Division 17)",
+    "net_budget": 55282003.31,
+    "used_budget": 30021692.26,
+    "remain_budget": 25260311.05,
+    "burn_rate": 54.31
+   },
+   "n_got": 7,
+   "n_gold": 8,
+   "cf_without_is_completed_correct": true
+  }
+ ],
+ "semantic_cause_note": "join_via_ledger_project_id removed from causes: ledger project_id == chain project in 800000/800000 rows, so it is correct, not an error. Dominant root cause: extra is_completed=0 ('delayed' reinterpreted)."
+}

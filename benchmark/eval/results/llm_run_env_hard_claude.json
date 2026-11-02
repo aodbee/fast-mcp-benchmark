@@ -1,0 +1,8 @@
+{
+ "backend": "claude CLI (claude -p --model opus --tools \"\" --no-session-persistence)",
+ "DEFINE_DELAYED": 1,
+ "questions": "qh_800000.jsonl (38 hard questions, 4 tiers)",
+ "systems": "fast_mcp,naive_sql,dail_sql_style,vanna_style",
+ "workers": 4,
+ "note": "tokens are Claude CLI usage; demos for dail/vanna unchanged"
+}

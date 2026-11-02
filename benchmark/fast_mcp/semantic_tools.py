@@ -13,9 +13,11 @@ import sqlite3
 from typing import Dict, Any, List
 
 class SemanticFastTools:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, ensure_indexes: bool = True, use_index_hint: bool = True):
         self.db_path = db_path
-        self._ensure_indexes()
+        self.use_index_hint = use_index_hint
+        if ensure_indexes:
+            self._ensure_indexes()
 
     def _ensure_indexes(self):
         """Ensures compound B-Tree indexes exist for sub-second retrieval"""
@@ -38,20 +40,20 @@ class SemanticFastTools:
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
-        cur.execute("""
-        SELECT p.project_code, p.project_name, 
+        hint = "INDEXED BY idx_statement_dept_year_month" if self.use_index_hint else ""
+        cur.execute(f"""
+        SELECT p.project_code, p.project_name,
                SUM(CAST(s.net_budget AS REAL)) as net,
                SUM(CAST(s.used_budget AS REAL)) as used,
                SUM(CAST(s.remain_budget AS REAL)) as remain
-        FROM projects p
-        JOIN transaction_statement s INDEXED BY idx_statement_dept_year_month
-          ON p.dept_code = s.dept_code AND p.fiscal_year = s.fiscal_year
-        WHERE p.dept_code = ? AND p.fiscal_year = ? AND s.month = ?
-        GROUP BY p.project_code, p.project_name
+        FROM transaction_statement s {hint}
+        JOIN projects p ON p.project_id = s.project_id
+        WHERE s.dept_code = ? AND s.fiscal_year = ? AND s.month = ?
+        GROUP BY p.project_id
         HAVING remain > ?
-        ORDER BY remain DESC LIMIT 10;
+        ORDER BY remain DESC, p.project_code ASC LIMIT 10;
         """, (dept_code, fiscal_year, month, min_remain))
-        
+
         rows = cur.fetchall()
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
         conn.close()
@@ -88,7 +90,7 @@ class SemanticFastTools:
         FROM staff_users u
         JOIN approval_forms f ON u.staff_id = f.staff_id
         WHERE u.dept_code = ?
-        ORDER BY f.amount DESC LIMIT 10;
+        ORDER BY f.amount DESC, f.doc_no ASC LIMIT 10;
         """, (dept_code,))
         
         rows = cur.fetchall()
@@ -113,15 +115,16 @@ class SemanticFastTools:
         placeholders = ",".join("?" for _ in dept_codes)
         params = list(dept_codes) + [fiscal_year, month]
 
+        hint = "INDEXED BY idx_statement_dept_year_month" if self.use_index_hint else ""
         cur.execute(f"""
         SELECT dept_code, 
                SUM(CAST(net_budget AS REAL)) as total_net,
                SUM(CAST(used_budget AS REAL)) as total_used,
                SUM(CAST(remain_budget AS REAL)) as total_remain,
                ROUND(SUM(CAST(used_budget AS REAL)) * 100.0 / SUM(CAST(net_budget AS REAL)), 2) as burn_rate
-        FROM transaction_statement INDEXED BY idx_statement_dept_year_month
+        FROM transaction_statement {hint}
         WHERE dept_code IN ({placeholders}) AND fiscal_year = ? AND month = ?
-        GROUP BY dept_code;
+        GROUP BY dept_code ORDER BY dept_code;
         """, params)
 
         rows = cur.fetchall()
